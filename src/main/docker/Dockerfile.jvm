@@ -4,7 +4,7 @@
 # docker build -f src/main/docker/Dockerfile.jvm -t mugicoder13/observai-query-backend-jvm .
 #
 # docker run -i --rm -p 8080:8080 mugicoder13/observai-backend-jvm
-####
+#### 
 
 FROM registry.access.redhat.com/ubi8/openjdk-11:1.16
 
