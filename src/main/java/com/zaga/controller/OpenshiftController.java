@@ -5,7 +5,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import com.zaga.handler.cloudPlatform.LoginHandler;
 
 import io.fabric8.openshift.client.OpenShiftClient;
-import jakarta.ejb.Timeout;
+// import jakarta.ejb.Timeout;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
