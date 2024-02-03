@@ -6,7 +6,9 @@
 # docker run -i --rm -p 8080:8080 mugicoder13/observai-backend-jvm
 ####
 
-FROM registry.access.redhat.com/ubi8/openjdk-11:1.16
+# FROM registry.access.redhat.com/ubi8/openjdk-11:1.16
+
+FROM registry.access.redhat.com/ubi8/openjdk-17:1.18 
 
 ENV LANGUAGE='en_US:en'
 

@@ -1,6 +1,6 @@
 package com.zaga.entity.oteltrace;
 
-import java.util.Collection;
+// import java.util.Collection;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
