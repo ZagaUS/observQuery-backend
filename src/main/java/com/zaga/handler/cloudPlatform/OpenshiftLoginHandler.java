@@ -879,6 +879,7 @@ for (Node node : nodes.getItems()) {
 		UserCredentials userCredentials = openshiftCredsRepo.getUser(username);
         System.out.println(userCredentials);
         List<Environments> environments = userCredentials.getEnvironments();
+        List<Map<String, Object>> clusterInventory = new ArrayList<>();
 
         // Create a list to store cluster names
         List<Map<String, Object>> clusters = new ArrayList<>();
@@ -904,9 +905,11 @@ for (Node node : nodes.getItems()) {
 
             Map<String, Object> combinedData = new HashMap<>();
             combinedData.put("clusters", clusters);
-            combinedData.put("loginResponse", response);
-
-            return Response.ok().entity(combinedData).build();
+            System.out.println(clusters);
+            combinedData.put("loginResponse", response.getEntity());
+            System.out.println(response);
+            clusterInventory.add(combinedData);
+            return Response.ok(clusterInventory).build();
             // return Response.ok().entity(clusters).build();
 
         } else {
