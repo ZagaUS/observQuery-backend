@@ -34,12 +34,12 @@ public interface LoginHandler {
 
     Response viewNodeIP(OpenShiftClient authenticatedClient);
 
-    Response listNodes(OpenShiftClient authenticatedClient);
 
     Response viewClustersInformation(OpenShiftClient authenticatedClient);
 
     Response listClusters(String username);
 
     public Response clusterLogin(String username , String clustername);
+    public Response clusterNodeLogin(String username , String clustername);
 }
 

@@ -804,7 +804,7 @@ for (Node node : nodes.getItems()) {
     
         try {
             OpenShiftClient openShiftClient = authenticatedClient.adapt(OpenShiftClient.class);
-        List<Map<String,String>> clusterConfigInfo = new ArrayList<>();
+            List<String> addresses = new ArrayList<>();
         List<Node> node = openShiftClient.nodes().list().getItems();
         Gson gson = new Gson();
         JsonElement jsonElement = gson.toJsonTree(node);
@@ -816,16 +816,15 @@ for (Node node : nodes.getItems()) {
             for (JsonElement jsonElement2 : jsonArray) {
                 String type = jsonElement2.getAsJsonObject().get("type").getAsString();
                 if(type.equalsIgnoreCase("HostName")){
-                String ipAddress = jsonElement2.getAsJsonObject().get("address").getAsString();
-                addressMap.put("hostname", ipAddress);
+                String address = jsonElement2.getAsJsonObject().get("address").getAsString();
+                addresses.add(address);}
                 // addressMap.put("ingressIP", ipAddress);
                 }
+            
             }
-            clusterConfigInfo.add(addressMap);
-        }
 
-        return Response.ok(clusterConfigInfo).build();
-    }catch (Exception e) {
+        return Response.ok(addresses).build();}
+    catch (Exception e) {
         e.printStackTrace();
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity("You are unauthorized to do this action.")
@@ -834,6 +833,41 @@ for (Node node : nodes.getItems()) {
 }
 
 
+@Override
+public Response clusterNodeLogin(String username , String clustername){
+    UserCredentials userCredentials = openshiftCredsRepo.getUser(username);
+    System.out.println("------user credientals----");
+    System.out.println(userCredentials);
+    System.out.println("---------------------------");
+    Gson gson = new Gson();
+    JsonElement jsonElement = gson.toJsonTree(userCredentials);
+    System.out.println(jsonElement);
+    System.out.println("---------------------------");
+    JsonArray jsonArray = jsonElement.getAsJsonObject().get("environments").getAsJsonArray();
+    String CLUSTERUSERNAME = null;
+    String CLUSTERPASSWORD = null;
+    String CLUSTERURL = null;
+    for (JsonElement jsonElement2 : jsonArray) {
+        String clusterName = jsonElement2.getAsJsonObject().get("clusterName").getAsString();
+        System.out.println(clusterName +"------------------");
+        String clusterUserName = jsonElement2.getAsJsonObject().get("clusterUsername").getAsString();
+        String clusterPassword = jsonElement2.getAsJsonObject().get("clusterPassword").getAsString();
+        String hostUrl = jsonElement2.getAsJsonObject().get("hostUrl").getAsString();
+        Integer clusterID = jsonElement2.getAsJsonObject().get("clusterId").getAsInt();
+
+        if (clusterName.equalsIgnoreCase(clustername)) {
+            CLUSTERUSERNAME = clusterUserName;
+            CLUSTERPASSWORD = clusterPassword;
+            CLUSTERURL = hostUrl;
+            break;
+        }
+    }
+    
+    OpenShiftClient openshiftLogin = login(CLUSTERUSERNAME,  CLUSTERPASSWORD,"", false,  CLUSTERURL);  
+    System.out.println(openshiftLogin);
+    // return null;
+    return listNodes(openshiftLogin);
+}
     @Override
     public Response clusterLogin(String username , String clustername){
         UserCredentials userCredentials = openshiftCredsRepo.getUser(username);
@@ -848,10 +882,7 @@ for (Node node : nodes.getItems()) {
         String CLUSTERUSERNAME = null;
         String CLUSTERPASSWORD = null;
         String CLUSTERURL = null;
-        System.out.println("clustreurllrlrl");
         for (JsonElement jsonElement2 : jsonArray) {
-            System.out.println("---------------jsonelement" +jsonElement2);
-            System.out.println("finishhhhhhhhhhhhhhhhh");
             String clusterName = jsonElement2.getAsJsonObject().get("clusterName").getAsString();
             System.out.println(clusterName +"------------------");
             String clusterUserName = jsonElement2.getAsJsonObject().get("clusterUsername").getAsString();
@@ -917,7 +948,10 @@ for (Node node : nodes.getItems()) {
                     .entity("Clusters not found for username: " + username)
                     .build();
         }
-    } 
+    }
+
+
+
 
     
 }

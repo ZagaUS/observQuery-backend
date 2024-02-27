@@ -69,12 +69,26 @@ public class OpenshiftController {
         return loginHandler.listAllServices(authenticatedClient);
     }
 
+
     @GET
     @Path("/listAllNodes")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response listAllNodes() {
-        return loginHandler.listNodes(authenticatedClient);
+    public Response listAllNodes(@QueryParam("username") String username,@QueryParam("clusterName") String clustername){
+        Response response = loginHandler.clusterNodeLogin(username, clustername);
+        
+        Object responseData = response.getEntity(); 
+        // Object[] responseDataArray = { responseData }; 
+      
+    return Response.ok(responseData).build(); 
+        
     }
+
+    // @GET
+    // @Path("/listAllNodes")
+    // @Produces(MediaType.APPLICATION_JSON)
+    // public Response listAllNodes(@QueryParam("username") String username,@QueryParam("clusterName") String clustername) {
+    //     return loginHandler.listNodes( username  , clustername);
+    // }
 
     // @GET
     // @Path("/viewClusterInfo")
