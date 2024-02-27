@@ -178,7 +178,11 @@ public Response getClusterInformation() {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getClusterNodeDetails(@QueryParam("username") String username,@QueryParam("clusterName") String clustername){
         Response response = loginHandler.clusterLogin(username, clustername);
-        return response;
+        Object responseData = response.getEntity(); 
+        Object[] responseDataArray = { responseData }; 
+      
+    return Response.ok(responseDataArray).build(); 
+        
     }
 
     @GET
