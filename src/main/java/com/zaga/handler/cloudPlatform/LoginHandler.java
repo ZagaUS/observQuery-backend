@@ -40,6 +40,6 @@ public interface LoginHandler {
 
     Response listClusters(String username);
 
-    public Response clusterLogin(String username , Integer clusterId);
+    public Response clusterLogin(String username , String clustername);
 }
 

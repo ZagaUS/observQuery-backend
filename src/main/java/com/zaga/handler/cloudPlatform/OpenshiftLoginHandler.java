@@ -835,7 +835,7 @@ for (Node node : nodes.getItems()) {
 
 
     @Override
-    public Response clusterLogin(String username , Integer clusterId){
+    public Response clusterLogin(String username , String clustername){
         UserCredentials userCredentials = openshiftCredsRepo.getUser(username);
         System.out.println("------user credientals----");
         System.out.println(userCredentials);
@@ -848,21 +848,28 @@ for (Node node : nodes.getItems()) {
         String CLUSTERUSERNAME = null;
         String CLUSTERPASSWORD = null;
         String CLUSTERURL = null;
+        System.out.println("clustreurllrlrl");
         for (JsonElement jsonElement2 : jsonArray) {
+            System.out.println("---------------jsonelement" +jsonElement2);
+            System.out.println("finishhhhhhhhhhhhhhhhh");
+            String clusterName = jsonElement2.getAsJsonObject().get("clusterName").getAsString();
+            System.out.println(clusterName +"------------------");
             String clusterUserName = jsonElement2.getAsJsonObject().get("clusterUsername").getAsString();
             String clusterPassword = jsonElement2.getAsJsonObject().get("clusterPassword").getAsString();
             String hostUrl = jsonElement2.getAsJsonObject().get("hostUrl").getAsString();
             Integer clusterID = jsonElement2.getAsJsonObject().get("clusterId").getAsInt();
 
-            if (clusterID == clusterId) {
+            if (clusterName.equalsIgnoreCase(clustername)) {
                 CLUSTERUSERNAME = clusterUserName;
                 CLUSTERPASSWORD = clusterPassword;
                 CLUSTERURL = hostUrl;
                 break;
             }
         }
-        OpenShiftClient openshiftLogin = login(CLUSTERUSERNAME,  CLUSTERPASSWORD,"", false,  CLUSTERURL);  
         
+        OpenShiftClient openshiftLogin = login(CLUSTERUSERNAME,  CLUSTERPASSWORD,"", false,  CLUSTERURL);  
+        System.out.println(openshiftLogin);
+        // return null;
         return viewClustersInformation(openshiftLogin);
     }
 
@@ -887,7 +894,21 @@ for (Node node : nodes.getItems()) {
 
         if (!clusters.isEmpty()) {
             // Return the list of cluster details if found
-            return Response.ok().entity(clusters).build();
+            // NEED TO SEND THE FIRST CLUSTER DETAILS TO FRONT END 
+            String clustername = clusters.get(0).get("clusterName").toString();
+            System.out.println("-------------------------");
+            System.out.println("--0------[CLUSTER NAME]-----" + clustername);
+            Response response = clusterLogin(username,clustername);
+            System.out.println(response);
+            System.out.println("-------------------------");
+
+            Map<String, Object> combinedData = new HashMap<>();
+            combinedData.put("clusters", clusters);
+            combinedData.put("loginResponse", response);
+
+            return Response.ok().entity(combinedData).build();
+            // return Response.ok().entity(clusters).build();
+
         } else {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity("Clusters not found for username: " + username)

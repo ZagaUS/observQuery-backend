@@ -176,8 +176,8 @@ public Response getClusterInformation() {
     @GET
     @Path("/getClusterNodeInformation")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getClusterNodeDetails(@QueryParam("username") String username,@QueryParam("clusterId") Integer clusterId){
-        Response response = loginHandler.clusterLogin(username, clusterId);
+    public Response getClusterNodeDetails(@QueryParam("username") String username,@QueryParam("clusterName") String clustername){
+        Response response = loginHandler.clusterLogin(username, clustername);
         return response;
     }
 
