@@ -874,23 +874,26 @@ for (Node node : nodes.getItems()) {
         List<Environments> environments = userCredentials.getEnvironments();
 
         // Create a list to store cluster names
-        List<String> clusterNames = new ArrayList<>();
+        List<Map<String, Object>> clusters = new ArrayList<>();
 
-        // Iterate through environments to find the cluster names
+        // Iterate through environments to find the cluster details
         for (Environments environment : environments) {
-            String clusterName = environment.getClusterName();
-            clusterNames.add(clusterName);
+            Map<String, Object> clusterDetails = new HashMap<>();
+            clusterDetails.put("clusterName", environment.getClusterName());
+            clusterDetails.put("clusterId", environment.getClusterId());
+            clusterDetails.put("clusterType", environment.getClusterType());
+            clusters.add(clusterDetails);
         }
 
-        if (!clusterNames.isEmpty()) {
-            // Return the list of cluster names if found
-            return Response.ok().entity(clusterNames).build();
+        if (!clusters.isEmpty()) {
+            // Return the list of cluster details if found
+            return Response.ok().entity(clusters).build();
         } else {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity("Clusters not found for username: " + username)
                     .build();
         }
-    }
+    } 
 
     
 }
