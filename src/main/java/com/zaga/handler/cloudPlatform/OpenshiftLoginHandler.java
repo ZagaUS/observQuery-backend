@@ -19,6 +19,7 @@ import com.zaga.entity.queryentity.openshift.UserCredentials;
 import com.zaga.repo.OpenshiftCredsRepo;
 import com.zaga.repo.ServiceListRepo;
 
+import io.fabric8.kubernetes.api.model.Cluster;
 import io.fabric8.kubernetes.api.model.ComponentCondition;
 import io.fabric8.kubernetes.api.model.ComponentStatus;
 import io.fabric8.kubernetes.api.model.Namespace;
@@ -39,6 +40,9 @@ import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.api.model.config.v1.ClusterVersion;
 import io.fabric8.openshift.api.model.config.v1.InfrastructureList;
+import io.fabric8.openshift.api.model.config.v1.InfrastructureSpec;
+import io.fabric8.openshift.api.model.hive.v1.ClusterClaimSpec;
+import io.fabric8.openshift.api.model.miscellaneous.metal3.v1alpha1.BareMetalHostList;
 import io.fabric8.openshift.client.OpenShiftClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -570,6 +574,7 @@ public class OpenshiftLoginHandler  implements LoginHandler{
 
 
 
+
         @Override
         public Response viewClusterNodes(OpenShiftClient authenticatedClient){
 
@@ -620,7 +625,7 @@ public class OpenshiftLoginHandler  implements LoginHandler{
             }
 
             @Override
-            public Response viewNodeIP(OpenShiftClient authenticatedClient, String nodeName) {
+            public Response viewNodeIP(OpenShiftClient authenticatedClient, String nodename) {
                 
                 if (authenticatedClient == null) {
                     return Response.status(Response.Status.UNAUTHORIZED)
@@ -658,7 +663,7 @@ public class OpenshiftLoginHandler  implements LoginHandler{
                     addressMap.put("nodeType", nodeType.toString());
 
                     String hostname = addressMap.get("Hostname");
-                    if (hostname != null && hostname.equals(nodeName)) {
+                    if (hostname != null && hostname.equals(nodename)) {
                         clusterConfigInfo.add(addressMap);
                     }
                 }
@@ -979,6 +984,17 @@ public OpenShiftClient commonClusterLogin(String username , String clustername){
 	}
 
 
+
+    @Override
+    public Response viewClusterCapacity(String username, String clustername){
+
+        OpenShiftClient openShiftClient = commonClusterLogin(username, clustername);
+        // InfrastructureList infrastructureList = openShiftClient.config().infrastructures().list();
+        NodeList spec = openShiftClient.nodes().list();
+        return Response.ok(spec).build();
+
+
+    }
 
 
     
