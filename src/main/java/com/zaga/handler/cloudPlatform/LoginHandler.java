@@ -44,5 +44,6 @@ public interface LoginHandler {
     public OpenShiftClient commonClusterLogin(String username , String clustername);
 
     Response clusterNodeDetails(String username , String clustername, String nodename);
+    Response getNodes(String username, String clustername, String nodename);
 }
 

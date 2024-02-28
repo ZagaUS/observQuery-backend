@@ -226,4 +226,13 @@ public Response getClusterInformation() {
     }
 
 
+    @GET
+    @Path("/getNodeDetails")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getNodeDetails(@QueryParam("username") String username,@QueryParam("clusterName") String clustername, @QueryParam("nodeName") String nodename){
+        Response response = loginHandler.getNodes(username, clustername, nodename);
+        return response;
+    }
+
+
 }

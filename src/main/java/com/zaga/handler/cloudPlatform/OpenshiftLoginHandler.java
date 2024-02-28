@@ -27,6 +27,7 @@ import io.fabric8.kubernetes.api.model.Node;
 import io.fabric8.kubernetes.api.model.NodeAddress;
 import io.fabric8.kubernetes.api.model.NodeList;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimList;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentList;
@@ -668,6 +669,29 @@ public class OpenshiftLoginHandler  implements LoginHandler{
 }
 }
 
+@Override
+public Response getNodes(String username, String clustername, String nodename) {
+    try {
+        OpenShiftClient openshiftLogin = commonClusterLogin(username, clustername);
+            PodList podList = openshiftLogin.pods().inAnyNamespace().list();
+            List<Pod> pods = podList.getItems();
+            
+            int podCount = 0;
+            for (Pod pod : pods) {
+                if (pod.getSpec().getNodeName() != null && pod.getSpec().getNodeName().equals(nodename)) {
+                    podCount++;
+                }
+            }
+            
+            return Response.ok(podCount).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("An error occurred while retrieving pod count.")
+                    .build();
+        }
+}
+
 
 
 
@@ -932,6 +956,7 @@ public OpenShiftClient commonClusterLogin(String username , String clustername){
         Response clusterComponentStatus = viewClusterCondition(openShiftClient);
         Response clusterNetwork = viewClusterNetwork(openShiftClient);
         Response nodeIp = viewNodeIP(openShiftClient, nodename);
+        Response nodeInventory = getNodes(username, clustername, nodename);
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("clusterInfo", clusterInfo.getEntity());
@@ -939,6 +964,7 @@ public OpenShiftClient commonClusterLogin(String username , String clustername){
         // responseData.put("clusterInventory", clusterInve);
         responseData.put("clusterNetwork", clusterNetwork.getEntity());
         responseData.put("clusterIP", nodeIp.getEntity());
+        responseData.put("nodeInventory", nodeInventory.getEntity());
         // responseData.put("clusterNodes", Arrays.asList(clusterNodeMap));
 // 
         return Response.ok(responseData).build();
