@@ -357,6 +357,9 @@ public class OpenshiftLoginHandler  implements LoginHandler{
                     .build();
         }
         else{
+
+
+            
             
             OpenShiftClient openShiftClient = authenticatedClient.adapt(OpenShiftClient.class);
 
@@ -373,6 +376,7 @@ public class OpenshiftLoginHandler  implements LoginHandler{
                     types.add(condition.getType());
                 }
 
+                
                 Map<String, String> clusterMap = new HashMap<>();
                 clusterMap.put("name", componentName);
                 clusterMap.put("condition", String.join(", ", types)); 
@@ -381,12 +385,13 @@ public class OpenshiftLoginHandler  implements LoginHandler{
                 clusterListInfo.add(clusterMap);
             }
 
-            Gson gson = new Gson();
-            String jsonOutput = gson.toJson(clusterListInfo);
+            // Gson gson = new Gson();
+            // String jsonOutput = gson.toJson(clusterListInfo);
 
-            System.out.println(jsonOutput);
+            // System.out.println(jsonOutput);
 
-            return Response.ok(jsonOutput).build();   }
+            // return Response.ok(jsonOutput).build();  
+            return Response.ok(clusterListInfo).build(); }
             catch (Exception e) {
                 e.printStackTrace();
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
