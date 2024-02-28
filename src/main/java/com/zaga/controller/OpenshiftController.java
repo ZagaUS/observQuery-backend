@@ -238,9 +238,9 @@ public Response getClusterInformation() {
     @GET
     @Path("/getClusterCapacity")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getClusterCapacity(@QueryParam("username") String username,@QueryParam("clusterName") String clustername){
-        Response response = loginHandler.viewClusterCapacity(username, clustername);
-        return response;
+    public Response getClusterCapacity(@QueryParam("username") String username,@QueryParam("clusterName") String clustername,@QueryParam("nodeName") String nodename){
+        // Response response = loginHandler.viewClusterCapacity(username, clustername,nodename);
+        return null;
     }
 
 
