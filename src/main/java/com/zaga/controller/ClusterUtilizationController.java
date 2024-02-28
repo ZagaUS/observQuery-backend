@@ -93,9 +93,11 @@ public class ClusterUtilizationController {
     public List<ClusterResponse> getAllClusterDataByDateAndTime(
             @QueryParam("from") LocalDate from,
             @QueryParam("to") LocalDate to,
-            @QueryParam("minutesAgo") int minutesAgo
+            @QueryParam("minutesAgo") int minutesAgo,
+            @QueryParam("clusterName") String clusterName,
+            @QueryParam("nodeName") String nodeName
             ) {
-        return clusterUtilizationHandler.getAllClusterByDateAndTime(from, to , minutesAgo);
+        return clusterUtilizationHandler.getAllClusterByDateAndTime(from, to , minutesAgo, clusterName, nodeName);
     }
   
 }
