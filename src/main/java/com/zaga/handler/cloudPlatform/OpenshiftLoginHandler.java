@@ -32,6 +32,7 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentList;
 import io.fabric8.kubernetes.api.model.storage.StorageClassList;
 import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -613,8 +614,8 @@ public class OpenshiftLoginHandler  implements LoginHandler{
             }
 
             @Override
-            public Response viewNodeIP(OpenShiftClient authenticatedClient) {
-
+            public Response viewNodeIP(OpenShiftClient authenticatedClient, String nodeName) {
+                
                 if (authenticatedClient == null) {
                     return Response.status(Response.Status.UNAUTHORIZED)
                             .entity("You are not logged in.")
@@ -626,7 +627,7 @@ public class OpenshiftLoginHandler  implements LoginHandler{
                 OpenShiftClient openShiftClient = authenticatedClient.adapt(OpenShiftClient.class);
 
                 List<Map<String,String>> clusterConfigInfo = new ArrayList<>();
-
+                        
                 for (Node node : openShiftClient.nodes().list().getItems()) {
                     String nodeType = " ";
                     if (isControlPlaneNode(node)) {
@@ -643,12 +644,18 @@ public class OpenshiftLoginHandler  implements LoginHandler{
                     JsonObject addressObject = addressElement.getAsJsonObject();
                     String type = addressObject.get("type").getAsString();
                     String ipAddress = addressObject.get("address").getAsString();
+                    
                     addressMap.put(type, ipAddress);
+                
+                    
                 }
                     addressMap.put("nodeType", nodeType.toString());
-                        clusterConfigInfo.add(addressMap);
-                }
 
+                    String hostname = addressMap.get("Hostname");
+                    if (hostname != null && hostname.equals(nodeName)) {
+                        clusterConfigInfo.add(addressMap);
+                    }
+                }
                 return Response.ok(clusterConfigInfo).build();}
 
 
@@ -794,16 +801,11 @@ for (Node node : nodes.getItems()) {
     }
 }
 
-    public Response listNodes(OpenShiftClient authenticatedClient){
+    @Override
+    public Response listNodes(String username , String clustername){
+try{
 
-        if (authenticatedClient == null) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity("You are not logged in.")
-                    .build();
-        }
-    
-        try {
-            OpenShiftClient openShiftClient = authenticatedClient.adapt(OpenShiftClient.class);
+            OpenShiftClient openShiftClient = commonClusterLogin(username, clustername);
             List<String> addresses = new ArrayList<>();
         List<Node> node = openShiftClient.nodes().list().getItems();
         Gson gson = new Gson();
@@ -834,7 +836,7 @@ for (Node node : nodes.getItems()) {
 
 
 @Override
-public Response clusterNodeLogin(String username , String clustername){
+public OpenShiftClient commonClusterLogin(String username , String clustername){
     UserCredentials userCredentials = openshiftCredsRepo.getUser(username);
     System.out.println("------user credientals----");
     System.out.println(userCredentials);
@@ -864,45 +866,19 @@ public Response clusterNodeLogin(String username , String clustername){
     }
     
     OpenShiftClient openshiftLogin = login(CLUSTERUSERNAME,  CLUSTERPASSWORD,"", false,  CLUSTERURL);  
-    System.out.println(openshiftLogin);
-    // return null;
-    return listNodes(openshiftLogin);
+    
+    return openshiftLogin;
 }
     @Override
-    public Response clusterLogin(String username , String clustername){
-        UserCredentials userCredentials = openshiftCredsRepo.getUser(username);
-        System.out.println("------user credientals----");
-        System.out.println(userCredentials);
-        System.out.println("---------------------------");
-        Gson gson = new Gson();
-        JsonElement jsonElement = gson.toJsonTree(userCredentials);
-        System.out.println(jsonElement);
-        System.out.println("---------------------------");
-        JsonArray jsonArray = jsonElement.getAsJsonObject().get("environments").getAsJsonArray();
-        String CLUSTERUSERNAME = null;
-        String CLUSTERPASSWORD = null;
-        String CLUSTERURL = null;
-        for (JsonElement jsonElement2 : jsonArray) {
-            String clusterName = jsonElement2.getAsJsonObject().get("clusterName").getAsString();
-            System.out.println(clusterName +"------------------");
-            String clusterUserName = jsonElement2.getAsJsonObject().get("clusterUsername").getAsString();
-            String clusterPassword = jsonElement2.getAsJsonObject().get("clusterPassword").getAsString();
-            String hostUrl = jsonElement2.getAsJsonObject().get("hostUrl").getAsString();
-            Integer clusterID = jsonElement2.getAsJsonObject().get("clusterId").getAsInt();
+    public Response clusterDetails(String username , String clustername){
 
-            if (clusterName.equalsIgnoreCase(clustername)) {
-                CLUSTERUSERNAME = clusterUserName;
-                CLUSTERPASSWORD = clusterPassword;
-                CLUSTERURL = hostUrl;
-                break;
-            }
-        }
-        
-        OpenShiftClient openshiftLogin = login(CLUSTERUSERNAME,  CLUSTERPASSWORD,"", false,  CLUSTERURL);  
-        System.out.println(openshiftLogin);
-        // return null;
+        OpenShiftClient openshiftLogin = commonClusterLogin(username, clustername);
         return viewClustersInformation(openshiftLogin);
     }
+
+
+
+
 
 
 	@Override
@@ -927,21 +903,18 @@ public Response clusterNodeLogin(String username , String clustername){
         if (!clusters.isEmpty()) {
             // Return the list of cluster details if found
             // NEED TO SEND THE FIRST CLUSTER DETAILS TO FRONT END 
-            String clustername = clusters.get(0).get("clusterName").toString();
-            System.out.println("-------------------------");
-            System.out.println("--0------[CLUSTER NAME]-----" + clustername);
-            Response response = clusterLogin(username,clustername);
-            System.out.println(response);
-            System.out.println("-------------------------");
-
-            Map<String, Object> combinedData = new HashMap<>();
-            combinedData.put("clusters", clusters);
-            System.out.println(clusters);
-            combinedData.put("loginResponse", response.getEntity());
-            System.out.println(response);
-            clusterInventory.add(combinedData);
-            return Response.ok(clusterInventory).build();
-            // return Response.ok().entity(clusters).build();
+            // String clustername = clusters.get(0).get("clusterName").toString();
+            // Response response = clusterDetails(username,clustername);
+            // Gson gson = new Gson();
+            // JsonElement jsonElement = gson.toJsonTree(response.getEntity());
+            // Integer nodeCount = jsonElement.getAsJsonObject().get("clusterInventory").getAsJsonArray().get(0).getAsJsonObject().get("Node").getAsInt();
+            
+            // Map<String, Object> combinedData = new HashMap<>();
+            // combinedData.put("clusters", clusters);
+            // System.out.println(clusters);
+            // combinedData.put("loginResponse", response.getEntity());
+            // clusterInventory.add(combinedData);
+            return Response.ok(clusters).build();
 
         } else {
             return Response.status(Response.Status.NOT_FOUND)
@@ -949,6 +922,30 @@ public Response clusterNodeLogin(String username , String clustername){
                     .build();
         }
     }
+
+
+	@Override
+	public Response clusterNodeDetails(String username, String clustername, String nodename) {
+
+        OpenShiftClient openShiftClient = commonClusterLogin(username, clustername);
+        Response clusterInfo = viewClusterInfo(openShiftClient);
+        Response clusterComponentStatus = viewClusterCondition(openShiftClient);
+        Response clusterNetwork = viewClusterNetwork(openShiftClient);
+        Response nodeIp = viewNodeIP(openShiftClient, nodename);
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("clusterInfo", clusterInfo.getEntity());
+        responseData.put("clusterStatus", clusterComponentStatus.getEntity());
+        // responseData.put("clusterInventory", clusterInve);
+        responseData.put("clusterNetwork", clusterNetwork.getEntity());
+        responseData.put("clusterIP", nodeIp.getEntity());
+        // responseData.put("clusterNodes", Arrays.asList(clusterNodeMap));
+// 
+        return Response.ok(responseData).build();
+
+
+        
+	}
 
 
 

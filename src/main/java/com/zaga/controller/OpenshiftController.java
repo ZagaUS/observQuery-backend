@@ -69,12 +69,18 @@ public class OpenshiftController {
         return loginHandler.listAllServices(authenticatedClient);
     }
 
+    // @GET
+    // @Path("/listPods")
+    // @Produces(MediaType.APPLICATION_JSON)
+    // public Response listPods() {
+    //     return loginHandler.listPods(authenticatedClient);
+    // }
 
     @GET
     @Path("/listAllNodes")
     @Produces(MediaType.APPLICATION_JSON)
     public Response listAllNodes(@QueryParam("username") String username,@QueryParam("clusterName") String clustername){
-        Response response = loginHandler.clusterNodeLogin(username, clustername);
+        Response response = loginHandler.listNodes(username, clustername);
         
         Object responseData = response.getEntity(); 
         // Object[] responseDataArray = { responseData }; 
@@ -126,12 +132,12 @@ public class OpenshiftController {
     //     return loginHandler.viewClusterIP(authenticatedClient);
     // }
 
-    // @GET
-    // @Path("/viewNodeIP")
-    // @Produces(MediaType.APPLICATION_JSON)
-    // public Response viewNodeIp() {
-    //     return loginHandler.viewNodeIP(authenticatedClient);
-    // }
+    @GET
+    @Path("/viewNodeIP")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response viewNodeIp(@QueryParam("nodeName") String nodeName) {
+        return loginHandler.viewNodeIP(authenticatedClient, nodeName);
+    }
 
 
     // @GET
@@ -188,10 +194,22 @@ public Response getClusterInformation() {
 
 
     @GET
+    @Path("/getClusterInformation")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getClusterDetails(@QueryParam("username") String username,@QueryParam("clusterName") String clustername){
+        Response response = loginHandler.clusterDetails(username, clustername);
+        Object responseData = response.getEntity(); 
+        Object[] responseDataArray = { responseData }; 
+      
+    return Response.ok(responseDataArray).build(); 
+        
+    }
+
+    @GET
     @Path("/getClusterNodeInformation")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getClusterNodeDetails(@QueryParam("username") String username,@QueryParam("clusterName") String clustername){
-        Response response = loginHandler.clusterLogin(username, clustername);
+    public Response getClusterNodeDetails(@QueryParam("username") String username,@QueryParam("clusterName") String clustername, @QueryParam("nodeName") String nodename){
+        Response response = loginHandler.clusterNodeDetails(username, clustername, nodename);
         Object responseData = response.getEntity(); 
         Object[] responseDataArray = { responseData }; 
       
