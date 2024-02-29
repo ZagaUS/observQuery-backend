@@ -17,8 +17,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaga.entity.queryentity.cluster_utilization.ClusterUtilizationDTO;
 import com.zaga.entity.queryentity.cluster_utilization.response.ClusterResponse;
 import com.zaga.handler.ClusterUtilizationHandler;
+import com.zaga.handler.cloudPlatform.OpenshiftLoginHandler;
 import com.zaga.repo.ClusterUtilizationDTORepo;
 
+import io.fabric8.openshift.client.OpenShiftClient;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -27,7 +30,11 @@ import jakarta.ws.rs.GET;
 @Path("/clusterUtilization")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ClusterUtilizationController {
+@ApplicationScoped
+public class ClusterUtilizationController{
+    
+    @Inject
+    OpenshiftLoginHandler openshiftLoginHandler;
     
     @Inject
     ClusterUtilizationHandler clusterUtilizationHandler;
@@ -95,9 +102,20 @@ public class ClusterUtilizationController {
             @QueryParam("to") LocalDate to,
             @QueryParam("minutesAgo") int minutesAgo,
             @QueryParam("clusterName") String clusterName,
-            @QueryParam("nodeName") String nodeName
+            @QueryParam("nodeName") String nodeName,
+            @QueryParam("userName") String userName
             ) {
-        return clusterUtilizationHandler.getAllClusterByDateAndTime(from, to , minutesAgo, clusterName, nodeName);
+        OpenShiftClient openShiftClient = openshiftLoginHandler.commonClusterLogin(userName, clusterName);
+        String nodeString = nodeName;
+        if(nodeName == null){nodeString="ClusterMethod";}
+        Response response = openshiftLoginHandler.viewClusterCapacity(openShiftClient, nodeString);
+        List<ClusterResponse> clusterResponses = clusterUtilizationHandler.getAllClusterByDateAndTime(from, to , minutesAgo, clusterName, nodeName);
+        if(clusterResponses.size() > 0 ){
+            for (ClusterResponse clusterResponse : clusterResponses) {
+                clusterResponse.setCpuCapacity((Integer)response.getEntity());
+            }
+        }
+        return clusterResponses;
     }
   
 }
