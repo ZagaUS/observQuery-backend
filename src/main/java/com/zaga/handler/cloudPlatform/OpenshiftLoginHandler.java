@@ -769,21 +769,21 @@ public class OpenshiftLoginHandler implements LoginHandler {
                 }
             }
             // Cluster IP
-            NodeList nodes = openShiftClient.nodes().list();
-            List<Map<String, String>> clusterIpList = new ArrayList<>();
-            for (Node node : nodes.getItems()) {
-                Map<String, String> ipMap = new HashMap<>();
-                List<NodeAddress> addresses = node.getStatus().getAddresses();
-                for (NodeAddress address : addresses) {
-                    String type = address.getType();
-                    String ipAddress = address.getAddress();
-                    if (type.equalsIgnoreCase("InternalIP")) {
-                        ipMap.put("apiIP", ipAddress);
-                        ipMap.put("ingressIP", ipAddress);
-                    }
-                }
-                clusterIpList.add(ipMap);
-            }
+            // NodeList nodes = openShiftClient.nodes().list();
+            // List<Map<String, String>> clusterIpList = new ArrayList<>();
+            // for (Node node : nodes.getItems()) {
+            //     Map<String, String> ipMap = new HashMap<>();
+            //     List<NodeAddress> addresses = node.getStatus().getAddresses();
+            //     for (NodeAddress address : addresses) {
+            //         String type = address.getType();
+            //         String ipAddress = address.getAddress();
+            //         if (type.equalsIgnoreCase("InternalIP")) {
+            //             ipMap.put("apiIP", ipAddress);
+            //             ipMap.put("ingressIP", ipAddress);
+            //         }
+            //     }
+            //     clusterIpList.add(ipMap);
+            // }
 
             // Cluster Nodes
             int controlPlaneNodeCount = 0;
@@ -800,12 +800,13 @@ public class OpenshiftLoginHandler implements LoginHandler {
             clusterNodeMap.put("workerNodes", String.valueOf(workerNodeCount));
 
             // Constructing the final response
+            Response clusterIp = viewClusterIP(openShiftClient);
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("clusterInfo", clusterListInfo);
             responseData.put("clusterStatus", clusterStatusList);
             responseData.put("clusterInventory", clusterInventory);
             responseData.put("clusterNetwork", clusterNetworkList);
-            responseData.put("clusterIP", clusterIpList);
+            responseData.put("clusterIP", clusterIp.getEntity());
             responseData.put("clusterNodes", Arrays.asList(clusterNodeMap));
             String clusterName = "ClusterMethod";
             Response cpuCapacity = viewClusterCapacity(openShiftClient, clusterName);
@@ -854,7 +855,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
         }
     }
 
-    @Override
+    @Override 
     public OpenShiftClient commonClusterLogin(String username, String clustername) {
         UserCredentials userCredentials = openshiftCredsRepo.getUser(username);
         System.out.println("------user credientals----");
