@@ -15,6 +15,7 @@ import com.zaga.handler.EventQueryhandler;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 
@@ -123,9 +124,11 @@ public class EventController {
     public Response getAllEventsDataByDateAndTime(
             @QueryParam("from") LocalDate from,
             @QueryParam("to") LocalDate to,
-            @QueryParam("minutesAgo") int minutesAgo
+            @QueryParam("minutesAgo") int minutesAgo,
+            @QueryParam("nodeName") String nodeName,
+            @QueryParam("clusterName") String clusterName
             ) {
-        List<EventsDTO> eventsList = handler.getAllEventsByDateAndTime(from, to, minutesAgo);
+        List<EventsDTO> eventsList = handler.getAllEventsByDateAndTime(from, to, minutesAgo, nodeName, clusterName);
         ObjectMapper mapper = new ObjectMapper();
         String jsonResult;
         try {
@@ -136,5 +139,26 @@ public class EventController {
         }
         return Response.ok(jsonResult).build();
     }
+
+
+    @GET
+    @Path("/get-recent-events")
+    public Response getRecentEvents(@QueryParam("minutesAgo") @DefaultValue("30") int minutesAgo,
+    @QueryParam("nodeName") String nodeName,
+    @QueryParam("clusterName") String clusterName) {
+        List<EventsDTO> eventsList = handler.getRecentEvents(minutesAgo, clusterName, nodeName);
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonResult;
+        try {
+            jsonResult = mapper.writeValueAsString(eventsList);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+        // System.out.println("------clusterName----"+ clusterName);
+        // System.out.println("-------nodename----"+ nodeName);
+        return Response.ok(jsonResult).build();
+    }
+
 
 }

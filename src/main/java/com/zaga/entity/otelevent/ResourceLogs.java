@@ -13,4 +13,5 @@ import lombok.NoArgsConstructor;
 public class ResourceLogs {
     private List<ScopeLogs> scopeLogs;
     private Resource resource;
+    private String schemaUrl;
 }

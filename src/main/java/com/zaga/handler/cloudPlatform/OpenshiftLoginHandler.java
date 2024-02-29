@@ -58,42 +58,8 @@ public class OpenshiftLoginHandler implements LoginHandler {
     ClusterNetwork clusterNetwork;
 
     @Inject
-    OpenshiftCredsRepo openshiftCredsRepo;
-
-    // public Response login(String username, String password, String clusterUrl){
-    // try {
-    // KubernetesClient kubernetesClient;
-    // kubernetesClient = new KubernetesClientBuilder()
-    // .withConfig(new ConfigBuilder()
-    // .withPassword(password)
-    // .withUsername(username)
-    // .withMasterUrl(clusterUrl)
-    // .withTrustCerts(true)
-    // .build())
-    // .build();
-    // OpenShiftClient openShiftClient =
-    // kubernetesClient.adapt(OpenShiftClient.class);
-    // openShiftClient.projects().list();
-    // String successMessage = "Login successful!";
-    // return Response.status(Response.Status.OK).entity(successMessage).build();
-
-    // }
-
-    // catch(KubernetesClientException e){
-    // String errorMessage = "Incorrect username or password.";
-    // return Response.status(Response.Status.OK).entity(errorMessage).build();
-
-    // }
-
-    // catch (Exception e) {
-    // e.printStackTrace();
-    // return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-    // .entity("Something went wrong with the system")
-    // .build();
-    // }
-
-    // }
-
+    OpenshiftCredsRepo openshiftCredsRepo;    
+    
     public OpenShiftClient login(String username, String password, String oauthToken, boolean useOAuthToken,
             String clusterUrl) {
         try {
@@ -858,20 +824,14 @@ public class OpenshiftLoginHandler implements LoginHandler {
     @Override 
     public OpenShiftClient commonClusterLogin(String username, String clustername) {
         UserCredentials userCredentials = openshiftCredsRepo.getUser(username);
-        System.out.println("------user credientals----");
-        System.out.println(userCredentials);
-        System.out.println("---------------------------");
         Gson gson = new Gson();
         JsonElement jsonElement = gson.toJsonTree(userCredentials);
-        System.out.println(jsonElement);
-        System.out.println("---------------------------");
         JsonArray jsonArray = jsonElement.getAsJsonObject().get("environments").getAsJsonArray();
         String CLUSTERUSERNAME = null;
         String CLUSTERPASSWORD = null;
         String CLUSTERURL = null;
         for (JsonElement jsonElement2 : jsonArray) {
             String clusterName = jsonElement2.getAsJsonObject().get("clusterName").getAsString();
-            System.out.println(clusterName + "------------------");
             String clusterUserName = jsonElement2.getAsJsonObject().get("clusterUsername").getAsString();
             String clusterPassword = jsonElement2.getAsJsonObject().get("clusterPassword").getAsString();
             String hostUrl = jsonElement2.getAsJsonObject().get("hostUrl").getAsString();
