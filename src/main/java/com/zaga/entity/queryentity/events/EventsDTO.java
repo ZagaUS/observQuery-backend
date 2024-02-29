@@ -24,6 +24,7 @@ public class EventsDTO {
     private String objectKind;
     private String objectName;
     private String objectFieldPath;
+    private String clusterName;
     private String severityText;
     private List<ScopeLogs> scopeLogs;
 
