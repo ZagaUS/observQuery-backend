@@ -32,14 +32,20 @@ public interface LoginHandler {
 
     Response viewClusterNodes(OpenShiftClient authenticatedClient);
 
-    Response viewNodeIP(OpenShiftClient authenticatedClient);
+    Response viewNodeIP(OpenShiftClient authenticatedClient, String nodename);
 
 
     Response viewClustersInformation(OpenShiftClient authenticatedClient);
 
     Response listClusters(String username);
+    Response listNodes(String username , String clustername);
 
-    public Response clusterLogin(String username , String clustername);
-    public Response clusterNodeLogin(String username , String clustername);
+    public Response clusterDetails(String username , String clustername);
+    public OpenShiftClient commonClusterLogin(String username , String clustername);
+
+    Response clusterNodeDetails(String username , String clustername, String nodename);
+    Response getNodes(String username, String clustername, String nodename);
+
+    Response viewClusterCapacity(OpenShiftClient openShiftClient, String nodename);
 }
 
