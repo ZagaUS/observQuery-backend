@@ -823,20 +823,14 @@ public class OpenshiftLoginHandler implements LoginHandler {
     @Override
     public OpenShiftClient commonClusterLogin(String username, String clustername) {
         UserCredentials userCredentials = openshiftCredsRepo.getUser(username);
-        System.out.println("------user credientals----");
-        System.out.println(userCredentials);
-        System.out.println("---------------------------");
         Gson gson = new Gson();
         JsonElement jsonElement = gson.toJsonTree(userCredentials);
-        System.out.println(jsonElement);
-        System.out.println("---------------------------");
         JsonArray jsonArray = jsonElement.getAsJsonObject().get("environments").getAsJsonArray();
         String CLUSTERUSERNAME = null;
         String CLUSTERPASSWORD = null;
         String CLUSTERURL = null;
         for (JsonElement jsonElement2 : jsonArray) {
             String clusterName = jsonElement2.getAsJsonObject().get("clusterName").getAsString();
-            System.out.println(clusterName + "------------------");
             String clusterUserName = jsonElement2.getAsJsonObject().get("clusterUsername").getAsString();
             String clusterPassword = jsonElement2.getAsJsonObject().get("clusterPassword").getAsString();
             String hostUrl = jsonElement2.getAsJsonObject().get("hostUrl").getAsString();

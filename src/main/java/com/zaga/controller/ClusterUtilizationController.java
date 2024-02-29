@@ -14,11 +14,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.zaga.entity.queryentity.cluster_utilization.ClusterUtilizationDTO;
 import com.zaga.entity.queryentity.cluster_utilization.response.ClusterResponse;
+import com.zaga.entity.queryentity.openshift.UserCredentials;
 import com.zaga.handler.ClusterUtilizationHandler;
 import com.zaga.handler.cloudPlatform.OpenshiftLoginHandler;
 import com.zaga.repo.ClusterUtilizationDTORepo;
+import com.zaga.repo.OpenshiftCredsRepo;
 
 import io.fabric8.openshift.client.OpenShiftClient;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -41,6 +46,9 @@ public class ClusterUtilizationController{
 
     @Inject
     ClusterUtilizationDTORepo clusterUtilizationDTORepo;
+
+    @Inject
+    OpenshiftCredsRepo openshiftCredsRepo;    
 
     @GET
     @Path("/getAllClusterUtilization_nodelevelData")
@@ -109,7 +117,21 @@ public class ClusterUtilizationController{
         String nodeString = nodeName;
         if(nodeName == null){nodeString="ClusterMethod";}
         Response response = openshiftLoginHandler.viewClusterCapacity(openShiftClient, nodeString);
-        List<ClusterResponse> clusterResponses = clusterUtilizationHandler.getAllClusterByDateAndTime(from, to , minutesAgo, clusterName, nodeName);
+        UserCredentials userCredentials = openshiftCredsRepo.getUser(userName);
+        Gson gson = new Gson();
+        JsonElement jsonElement = gson.toJsonTree(userCredentials);
+        JsonArray jsonArray = jsonElement.getAsJsonObject().get("environments").getAsJsonArray();
+        String OPENSHIFTCLUSTERNAME = null;
+        for (JsonElement jsonElement2 : jsonArray) {
+            String dbClusterName = jsonElement2.getAsJsonObject().get("clusterName").getAsString();
+            String openshiftClusterName = jsonElement2.getAsJsonObject().get("openshiftClusterName").getAsString();
+
+            if (clusterName.equalsIgnoreCase(dbClusterName)) {
+                OPENSHIFTCLUSTERNAME = openshiftClusterName;
+                break;
+            }
+        }
+        List<ClusterResponse> clusterResponses = clusterUtilizationHandler.getAllClusterByDateAndTime(from, to , minutesAgo, OPENSHIFTCLUSTERNAME, nodeName);
         if(clusterResponses.size() > 0 ){
             for (ClusterResponse clusterResponse : clusterResponses) {
                 clusterResponse.setCpuCapacity((Integer)response.getEntity());
