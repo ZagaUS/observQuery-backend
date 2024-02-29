@@ -143,8 +143,10 @@ public class EventController {
 
     @GET
     @Path("/get-recent-events")
-    public Response getRecentEvents(@QueryParam("minutesAgo") @DefaultValue("30") int minutesAgo) {
-        List<EventsDTO> eventsList = handler.getRecentEvents(minutesAgo);
+    public Response getRecentEvents(@QueryParam("minutesAgo") @DefaultValue("30") int minutesAgo,
+    @QueryParam("nodeName") String nodeName,
+    @QueryParam("clusterName") String clusterName) {
+        List<EventsDTO> eventsList = handler.getRecentEvents(minutesAgo, clusterName, nodeName);
         ObjectMapper mapper = new ObjectMapper();
         String jsonResult;
         try {
@@ -153,6 +155,8 @@ public class EventController {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
+        // System.out.println("------clusterName----"+ clusterName);
+        // System.out.println("-------nodename----"+ nodeName);
         return Response.ok(jsonResult).build();
     }
 
