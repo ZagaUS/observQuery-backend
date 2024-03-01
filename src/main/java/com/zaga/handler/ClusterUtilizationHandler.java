@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.bson.BsonNull;
@@ -232,6 +233,8 @@ public class ClusterUtilizationHandler {
                 }
                 
                 List<Document> aggregatedList = Stream.concat(pipeline.stream(), groupPipeLine.stream()).toList();
+                // List<Document> aggregatedList = Stream.concat(pipeline.stream(), groupPipeLine.stream()).collect(Collectors.toList());
+
                 return aggregatedList;
         }
         public List<Document> matchPipeline(List<Document> pipeline,String clusterName,String nodeName){
@@ -248,6 +251,7 @@ public class ClusterUtilizationHandler {
                         new Document("clusterName", clusterName)));
                 }
                 List<Document> matchFilter = Stream.concat(pipeline.stream(), matchPipeLine.stream()).toList();
+                // List<Document> matchFilter = Stream.concat(pipeline.stream(), matchPipeLine.stream()).collect(Collectors.toList());
                 return matchFilter;
         }
 }
