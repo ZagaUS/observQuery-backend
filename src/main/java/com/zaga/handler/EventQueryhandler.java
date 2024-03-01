@@ -242,6 +242,7 @@ private List<EventsDTO> executeAnotherLogic(
                     Projections.include("nodeName", "objectKind", "objectName", "scopeLogs", "severityText", "createdTime", "clusterName")
             )
     ));
+    pipeline.add(Aggregates.sort(Sorts.descending("createdTime")));
 
     AggregateIterable<Document> aggregationResult = null;
     try {
@@ -436,7 +437,7 @@ private List<EventsDTO> executeRecentLogic(
             Projections.include("nodeName", "objectKind", "objectName", "scopeLogs", "severityText", "createdTime", "clusterName")
         )
     ));
-
+    pipeline.add(Aggregates.sort(Sorts.descending("createdTime")));
     AggregateIterable<Document> aggregationResult;
     try {
         aggregationResult = collection.aggregate(pipeline);
