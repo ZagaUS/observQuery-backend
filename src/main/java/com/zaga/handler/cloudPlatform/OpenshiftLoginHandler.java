@@ -782,7 +782,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
             clusterDetails.put("clusterName", environment.getClusterName());
             clusterDetails.put("clusterId", environment.getClusterId());
             clusterDetails.put("clusterType", environment.getClusterType());
-            clusterDetails.put("userName", environment.getClusterName());
+            clusterDetails.put("clusterUserName", environment.getClusterUsername());
             clusterDetails.put("hostUrl", environment.getHostUrl());
             clusterDetails.put("clusterPassword", environment.getClusterPassword());
             clusterDetails.put("openshiftClusterName", environment.getOpenshiftClusterName());
