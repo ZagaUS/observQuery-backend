@@ -14,9 +14,9 @@ public interface LoginHandler {
 
     Response listAllServices(String username, String clustername);
 
-    void instrumentDeployment(OpenShiftClient authenticatedClient,String namespace, String deploymentName);
+    void instrumentDeployment(String username, String clustername, String namespace, String deploymentName);
 
-    void unInstrumentDeployment(OpenShiftClient authenticatedClient,String namespace, String deploymentName);
+    void unInstrumentDeployment(String username, String clustername, String namespace, String deploymentName);
 
     String logout(OpenShiftClient authenticatedClient);
 
@@ -35,7 +35,7 @@ public interface LoginHandler {
     Response viewNodeIP(OpenShiftClient authenticatedClient, String nodename);
 
 
-    Response viewClustersInformation(OpenShiftClient authenticatedClient);
+    // Response viewClustersInformation(String username, String clustername);
 
     Response listClusters(String username);
     Response listNodes(String username , String clustername);

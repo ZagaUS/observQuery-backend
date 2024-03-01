@@ -66,7 +66,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
             KubernetesClient kubernetesClient;
 
             if (useOAuthToken) {
-                kubernetesClient = new KubernetesClientBuilder() // "https://api.zagaopenshift.zagaopensource.com:6443"
+                kubernetesClient = new KubernetesClientBuilder() 
                         .withConfig(new ConfigBuilder()
                                 .withOauthToken(oauthToken)
                                 .withMasterUrl(clusterUrl)
@@ -127,6 +127,8 @@ public class OpenshiftLoginHandler implements LoginHandler {
         return listServices(openshiftLogin);
 
     }
+
+    
     public Response listServices(OpenShiftClient authenticatedClient) {
         System.out.println("clientservices" + authenticatedClient);
         if (authenticatedClient != null) {
@@ -186,7 +188,15 @@ public class OpenshiftLoginHandler implements LoginHandler {
     }
 
     @Override
-    public void instrumentDeployment(OpenShiftClient authenticatedClient, String namespace, String deploymentName) {
+    public void instrumentDeployment(String username, String clustername, String namespace, String deploymentName){
+
+        OpenShiftClient openshiftLogin = commonClusterLogin(username, clustername);
+        instrumentation(openshiftLogin, namespace, deploymentName);
+
+    }
+
+
+    public void instrumentation(OpenShiftClient authenticatedClient, String namespace, String deploymentName) {
         System.out.println("namespace: " + namespace);
         System.out.println("deploymentName: " + deploymentName);
         System.out.println("client: " + authenticatedClient);
@@ -227,7 +237,14 @@ public class OpenshiftLoginHandler implements LoginHandler {
     }
 
     @Override
-    public void unInstrumentDeployment(OpenShiftClient authenticatedClient, String namespace, String deploymentName) {
+    public void unInstrumentDeployment(String username, String clustername, String namespace, String deploymentName) {
+        OpenShiftClient openshiftLogin = commonClusterLogin(username, clustername);
+        uninstrumentation(openshiftLogin, namespace, deploymentName);
+
+    }
+
+
+    public void uninstrumentation(OpenShiftClient authenticatedClient, String namespace, String deploymentName) {
         System.out.println("namespace: " + namespace);
         System.out.println("deploymentName: " + deploymentName);
         System.out.println("client: " + authenticatedClient);
@@ -356,12 +373,6 @@ public class OpenshiftLoginHandler implements LoginHandler {
                     clusterListInfo.add(clusterMap);
                 }
 
-                // Gson gson = new Gson();
-                // String jsonOutput = gson.toJson(clusterListInfo);
-
-                // System.out.println(jsonOutput);
-
-                // return Response.ok(jsonOutput).build();
                 return Response.ok(clusterListInfo).build();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -562,7 +573,6 @@ public class OpenshiftLoginHandler implements LoginHandler {
                 }
                 clusterConfigInfo.put("controlPlaneNodes", String.valueOf(controlPlaneNodeCount));
                 clusterConfigInfo.put("workerNodes", String.valueOf(workerNodeCount));
-
                 return Response.ok(clusterConfigInfo).build();
 
             } catch (Exception e) {
@@ -660,126 +670,25 @@ public class OpenshiftLoginHandler implements LoginHandler {
 
     // one method
     @Override
-    public Response viewClustersInformation(OpenShiftClient authenticatedClient) {
-        if (authenticatedClient == null) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity("You are not logged in.")
-                    .build();
-        }
+    public Response clusterDetails(String username, String clustername) {
+        try{        
 
-        try {
-            OpenShiftClient openShiftClient = authenticatedClient.adapt(OpenShiftClient.class);
 
-            // Cluster Info 
-            List<ClusterVersion> clusterInfo = openShiftClient.config().clusterVersions().list().getItems();
-            List<Map<String, String>> clusterListInfo = new ArrayList<>();
-            for (ClusterVersion clusterVersion : clusterInfo) {
-                Gson gson = new Gson();
-                JsonElement jsonElement = gson.toJsonTree(clusterVersion);
-                JsonObject jsonObject = (JsonObject) jsonElement.getAsJsonObject().get("spec");
-                JsonObject jsonObject2 = (JsonObject) jsonElement.getAsJsonObject().get("status");
-                Map<String, String> clusterInfoMap = new HashMap<>();
-                clusterInfoMap.put("clusterID", jsonObject.get("clusterID").getAsString());
-                clusterInfoMap.put("channel", jsonObject.get("channel").getAsString());
-                clusterInfoMap.put("version",
-                        jsonObject2.get("desired").getAsJsonObject().get("version").getAsString());
-                clusterListInfo.add(clusterInfoMap);
-            }
-
-            // Cluster Status
-            List<ComponentStatus> clusterStatus = openShiftClient.componentstatuses().list().getItems();
-            List<Map<String, String>> clusterStatusList = new ArrayList<>();
-            for (ComponentStatus componentStatus : clusterStatus) {
-                String componentName = componentStatus.getMetadata().getName();
-                List<String> types = new ArrayList<>();
-                for (ComponentCondition condition : componentStatus.getConditions()) {
-                    types.add(condition.getType());
-                }
-                Map<String, String> clusterMap = new HashMap<>();
-                clusterMap.put("name", componentName);
-                clusterMap.put("condition", String.join(", ", types));
-                clusterStatusList.add(clusterMap);
-            }
-
-            // Cluster Inventory
-            NodeList nodeList = openShiftClient.nodes().list();
-            PersistentVolumeClaimList pvc = openShiftClient.persistentVolumeClaims().inAnyNamespace().list();
-            PodList podList = openShiftClient.pods().inAnyNamespace().list();
-            StorageClassList storage = openShiftClient.storage().storageClasses().list();
-            // Aggregate counts
-            int nodeCount = nodeList.getItems().size();
-            int pvcCount = pvc.getItems().size();
-            int podCount = podList.getItems().size();
-            int storageClassCount = storage.getItems().size();
-            List<Map<String, Integer>> clusterInventory = new ArrayList<>();
-            Map<String, Integer> clusterInventoryMap = new HashMap<>();
-            clusterInventoryMap.put("Node", nodeCount);
-            clusterInventoryMap.put("StorageClass", storageClassCount);
-            clusterInventoryMap.put("PersistentVolumeClaims", pvcCount);
-            clusterInventoryMap.put("Pods", podCount);
-            clusterInventory.add(clusterInventoryMap);
-
-            // Cluster Network
-            List<io.fabric8.openshift.api.model.config.v1.Network> clusterNetworkInfo = openShiftClient.config()
-                    .networks().list().getItems();
-            List<Map<String, String>> clusterNetworkList = new ArrayList<>();
-            for (io.fabric8.openshift.api.model.config.v1.Network network : clusterNetworkInfo) {
-                Gson gson = new Gson();
-                JsonElement jsonElement = gson.toJsonTree(network);
-                JsonObject jsonObject = (JsonObject) jsonElement.getAsJsonObject().get("spec");
-                JsonArray clusterNetworkArray = jsonObject.getAsJsonArray("clusterNetwork");
-                for (JsonElement clusterNetworkElement : clusterNetworkArray) {
-                    JsonObject clusterNetworkObject = clusterNetworkElement.getAsJsonObject();
-                    String cidr = clusterNetworkObject.get("cidr").getAsString();
-                    int hostPrefix = clusterNetworkObject.get("hostPrefix").getAsInt();
-                    Map<String, String> clusterNetworkMap = new HashMap<>();
-                    clusterNetworkMap.put("networkType", jsonObject.get("networkType").getAsString());
-                    clusterNetworkMap.put("serviceNetwork", jsonObject.get("serviceNetwork").getAsString());
-                    clusterNetworkMap.put("cidr", cidr);
-                    clusterNetworkMap.put("hostPrefix", String.valueOf(hostPrefix));
-                    clusterNetworkList.add(clusterNetworkMap);
-                }
-            }
-            // Cluster IP
-            // NodeList nodes = openShiftClient.nodes().list();
-            // List<Map<String, String>> clusterIpList = new ArrayList<>();
-            // for (Node node : nodes.getItems()) {
-            //     Map<String, String> ipMap = new HashMap<>();
-            //     List<NodeAddress> addresses = node.getStatus().getAddresses();
-            //     for (NodeAddress address : addresses) {
-            //         String type = address.getType();
-            //         String ipAddress = address.getAddress();
-            //         if (type.equalsIgnoreCase("InternalIP")) {
-            //             ipMap.put("apiIP", ipAddress);
-            //             ipMap.put("ingressIP", ipAddress);
-            //         }
-            //     }
-            //     clusterIpList.add(ipMap);
-            // }
-
-            // Cluster Nodes
-            int controlPlaneNodeCount = 0;
-            int workerNodeCount = 0;
-            for (Node node : nodeList.getItems()) {
-                if (isControlPlaneNode(node)) {
-                    controlPlaneNodeCount++;
-                } else if (isWorkerNode(node)) {
-                    workerNodeCount++;
-                }
-            }
-            Map<String, String> clusterNodeMap = new HashMap<>();
-            clusterNodeMap.put("controlPlaneNodes", String.valueOf(controlPlaneNodeCount));
-            clusterNodeMap.put("workerNodes", String.valueOf(workerNodeCount));
-
-            // Constructing the final response
-            Response clusterIp = viewClusterIP(openShiftClient);
+            OpenShiftClient openShiftClient = commonClusterLogin(username, clustername);
+            Response clusterInfo = viewClusterInfo(openShiftClient);
+            Response clusterComponentStatus = viewClusterCondition(openShiftClient);
+            Response clusterInventory = viewClusterInventory(openShiftClient);
+            Response clusterNetwork = viewClusterNetwork(openShiftClient);
+            Response clusterIp = viewClusterIP(openShiftClient);  
+            Response clusterNodeMap = viewClusterNodes(openShiftClient);          
+    
             Map<String, Object> responseData = new HashMap<>();
-            responseData.put("clusterInfo", clusterListInfo);
-            responseData.put("clusterStatus", clusterStatusList);
-            responseData.put("clusterInventory", clusterInventory);
-            responseData.put("clusterNetwork", clusterNetworkList);
+            responseData.put("clusterInfo", clusterInfo.getEntity());
+            responseData.put("clusterStatus", clusterComponentStatus.getEntity());
+            responseData.put("clusterInventory", clusterInventory.getEntity());
+            responseData.put("clusterNetwork", clusterNetwork.getEntity());
             responseData.put("clusterIP", clusterIp.getEntity());
-            responseData.put("clusterNodes", Arrays.asList(clusterNodeMap));
+            responseData.put("clusterNodes", Arrays.asList(clusterNodeMap.getEntity()));
             String clusterName = "ClusterMethod";
             Response cpuCapacity = viewClusterCapacity(openShiftClient, clusterName);
             responseData.put("cpuCapacity", cpuCapacity.getEntity());
@@ -813,7 +722,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
                         String address = jsonElement2.getAsJsonObject().get("address").getAsString();
                         addresses.add(address);
                     }
-                    // addressMap.put("ingressIP", ipAddress);
+
                 }
 
             }
@@ -856,12 +765,6 @@ public class OpenshiftLoginHandler implements LoginHandler {
         return openshiftLogin;
     }
 
-    @Override
-    public Response clusterDetails(String username, String clustername) {
-
-        OpenShiftClient openshiftLogin = commonClusterLogin(username, clustername);
-        return viewClustersInformation(openshiftLogin);
-    }
 
     @Override
     public Response listClusters(String username) {

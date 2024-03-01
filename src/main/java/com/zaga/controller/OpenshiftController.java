@@ -69,13 +69,6 @@ public class OpenshiftController {
         return loginHandler.listAllServices(username, clustername);
     }
 
-    // @GET
-    // @Path("/listPods")
-    // @Produces(MediaType.APPLICATION_JSON)
-    // public Response listPods() {
-    //     return loginHandler.listPods(authenticatedClient);
-    // }
-
     @GET
     @Path("/listAllNodes")
     @Produces(MediaType.APPLICATION_JSON)
@@ -152,18 +145,22 @@ public class OpenshiftController {
     @POST
     @Path("/instrument/{namespace}/{deploymentName}")
     public Response instrumentDeployment(
+        @QueryParam(value = "username") String username,
+        @QueryParam(value = "clusterName") String clustername,
         @PathParam(value = "namespace") String namespace,
          @PathParam(value = "deploymentName") String deploymentName) {
-            loginHandler.instrumentDeployment(authenticatedClient, namespace, deploymentName);
+            loginHandler.instrumentDeployment(username, clustername, namespace, deploymentName);
         return Response.ok("Instrumented "+deploymentName+"service").build();
     }
 
     @POST
     @Path("/unInstrument/{namespace}/{deploymentName}")
     public Response unInstrumentDeployment(
+        @QueryParam(value = "username") String username,
+        @QueryParam(value = "clusterName") String clustername,
         @PathParam(value = "namespace") String namespace,
          @PathParam(value = "deploymentName") String deploymentName) {
-            loginHandler.unInstrumentDeployment(authenticatedClient, namespace, deploymentName);
+            loginHandler.unInstrumentDeployment(username, clustername, namespace, deploymentName);
         return Response.ok("Uninstrumented"+deploymentName+"service").build();
     }
     
@@ -181,15 +178,15 @@ public class OpenshiftController {
 
 
 
-@GET
-@Path("/combinedinfo")
-@Produces(MediaType.APPLICATION_JSON)
-public Response getClusterInformation() {
-    Response response = loginHandler.viewClustersInformation(authenticatedClient); 
-    Object responseData = response.getEntity(); 
-    Object[] responseDataArray = { responseData }; 
-    return Response.ok(responseDataArray).build(); 
-}
+// @GET
+// @Path("/combinedinfo")
+// @Produces(MediaType.APPLICATION_JSON)
+// public Response getClusterInformation() {
+//     Response response = loginHandler.viewClustersInformation(authenticatedClient); 
+//     Object responseData = response.getEntity(); 
+//     Object[] responseDataArray = { responseData }; 
+//     return Response.ok(responseDataArray).build(); 
+// }
 
 
 
