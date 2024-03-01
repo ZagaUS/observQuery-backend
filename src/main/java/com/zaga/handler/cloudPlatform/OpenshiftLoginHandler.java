@@ -664,7 +664,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
         try {
             OpenShiftClient openShiftClient = authenticatedClient.adapt(OpenShiftClient.class);
 
-            // Cluster Info
+            // Cluster Info 
             List<ClusterVersion> clusterInfo = openShiftClient.config().clusterVersions().list().getItems();
             List<Map<String, String>> clusterListInfo = new ArrayList<>();
             for (ClusterVersion clusterVersion : clusterInfo) {
@@ -873,6 +873,10 @@ public class OpenshiftLoginHandler implements LoginHandler {
             clusterDetails.put("clusterName", environment.getClusterName());
             clusterDetails.put("clusterId", environment.getClusterId());
             clusterDetails.put("clusterType", environment.getClusterType());
+            clusterDetails.put("userName", environment.getClusterName());
+            clusterDetails.put("hostUrl", environment.getHostUrl());
+            clusterDetails.put("clusterPassword", environment.getClusterPassword());
+            clusterDetails.put("openshiftClusterName", environment.getOpenshiftClusterName());
             clusters.add(clusterDetails);
         }
 
