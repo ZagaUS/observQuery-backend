@@ -121,7 +121,13 @@ public class OpenshiftLoginHandler implements LoginHandler {
     }
 
     @Override
-    public Response listAllServices(OpenShiftClient authenticatedClient) {
+    public Response listAllServices(String username, String clustername){
+
+        OpenShiftClient openshiftLogin = commonClusterLogin(username, clustername);
+        return listServices(openshiftLogin);
+
+    }
+    public Response listServices(OpenShiftClient authenticatedClient) {
         System.out.println("clientservices" + authenticatedClient);
         if (authenticatedClient != null) {
             try {

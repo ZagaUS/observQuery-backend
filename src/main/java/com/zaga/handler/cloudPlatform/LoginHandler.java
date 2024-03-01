@@ -12,7 +12,7 @@ public interface LoginHandler {
 
     OpenShiftClient login(String username, String password, String oauthToken, boolean useOAuthToken, String clusterUrl);
 
-    Response listAllServices(OpenShiftClient authenticatedClient);
+    Response listAllServices(String username, String clustername);
 
     void instrumentDeployment(OpenShiftClient authenticatedClient,String namespace, String deploymentName);
 

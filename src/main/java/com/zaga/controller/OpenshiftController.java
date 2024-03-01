@@ -65,8 +65,8 @@ public class OpenshiftController {
     @GET
     @Path("/listAllProjects")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response listAllProjects() {
-        return loginHandler.listAllServices(authenticatedClient);
+    public Response listAllProjects(@QueryParam("username") String username,@QueryParam("clusterName") String clustername) {
+        return loginHandler.listAllServices(username, clustername);
     }
 
     // @GET
