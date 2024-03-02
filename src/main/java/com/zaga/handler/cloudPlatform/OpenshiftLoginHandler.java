@@ -746,8 +746,9 @@ public class OpenshiftLoginHandler implements LoginHandler {
         String CLUSTERPASSWORD = null;
         String CLUSTERURL = null;
         for (JsonElement jsonElement2 : jsonArray) {
+            System.out.println("---------------[COMMON CLUSTER LOGIN]----------- " + jsonElement2);
             String clusterName = jsonElement2.getAsJsonObject().get("clusterName").getAsString();
-            String clusterUserName = jsonElement2.getAsJsonObject().get("clusterUsername").getAsString();
+            String clusterUserName =  jsonElement2.getAsJsonObject().get("clusterUsername") == null ? null :  jsonElement2.getAsJsonObject().get("clusterUsername").getAsString();
             String clusterPassword = jsonElement2.getAsJsonObject().get("clusterPassword").getAsString();
             String hostUrl = jsonElement2.getAsJsonObject().get("hostUrl").getAsString();
             Integer clusterID = jsonElement2.getAsJsonObject().get("clusterId").getAsInt();

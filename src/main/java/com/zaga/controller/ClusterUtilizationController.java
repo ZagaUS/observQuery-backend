@@ -124,7 +124,7 @@ public class ClusterUtilizationController{
         String OPENSHIFTCLUSTERNAME = null;
         for (JsonElement jsonElement2 : jsonArray) {
             String dbClusterName = jsonElement2.getAsJsonObject().get("clusterName").getAsString();
-            String openshiftClusterName = jsonElement2.getAsJsonObject().get("openshiftClusterName").getAsString();
+            String openshiftClusterName = jsonElement2.getAsJsonObject().get("openshiftClusterName") == null ? null : jsonElement2.getAsJsonObject().get("openshiftClusterName").getAsString();
 
             if (clusterName.equalsIgnoreCase(dbClusterName)) {
                 OPENSHIFTCLUSTERNAME = openshiftClusterName;
