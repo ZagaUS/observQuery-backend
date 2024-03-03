@@ -21,6 +21,7 @@ import com.zaga.entity.queryentity.cluster_utilization.ClusterUtilizationDTO;
 import com.zaga.entity.queryentity.cluster_utilization.response.ClusterResponse;
 import com.zaga.repo.ClusterUtilizationDTORepo;
 
+import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -37,6 +38,7 @@ public class ClusterUtilizationHandler {
         return clusterUtilizationDTORepo.listAll();
         }
 
+        @CacheResult(cacheName = "wcluster-details")
         public List<ClusterResponse> getAllClusterByDateAndTime(
         LocalDate from,
         LocalDate to,
@@ -77,6 +79,7 @@ public class ClusterUtilizationHandler {
         return result;
         }
 
+        // @CacheResult(cacheName = "mongodb-aggregation-one")
         public List<ClusterResponse> executeAggregationPipeline(
         MongoCollection<Document> collection,
         LocalDate from,
@@ -122,8 +125,8 @@ public class ClusterUtilizationHandler {
                 return resultData(aggregationResult);
         }
         
-
-        private List<ClusterResponse> executeAnotherLogic(
+        @CacheResult(cacheName = "mongodb-aggregation-two")
+        public List<ClusterResponse> executeAnotherLogic(
         MongoCollection<Document> collection,
         LocalDate from,
         Integer minutesAgo,

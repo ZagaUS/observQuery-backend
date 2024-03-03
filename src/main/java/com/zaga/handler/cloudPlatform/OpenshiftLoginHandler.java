@@ -44,6 +44,7 @@ import io.fabric8.openshift.api.model.config.v1.InfrastructureSpec;
 import io.fabric8.openshift.api.model.hive.v1.ClusterClaimSpec;
 import io.fabric8.openshift.api.model.miscellaneous.metal3.v1alpha1.BareMetalHostList;
 import io.fabric8.openshift.client.OpenShiftClient;
+import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
@@ -60,6 +61,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
     @Inject
     OpenshiftCredsRepo openshiftCredsRepo;    
     
+    @CacheResult(cacheName = "openshift-cluster-login")
     public OpenShiftClient login(String username, String password, String oauthToken, boolean useOAuthToken,
             String clusterUrl) {
         try {
@@ -302,6 +304,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
         return "Logged out successfully!";
     }
 
+    @CacheResult(cacheName = "openshift-cluster-view")
     @Override
     public Response viewClusterInfo(OpenShiftClient authenticatedClient) {
 
@@ -342,6 +345,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
 
     }
 
+    @CacheResult(cacheName = "openshift-cluster-condition")
     @Override
     public Response viewClusterCondition(OpenShiftClient authenticatedClient) {
         if (authenticatedClient == null) {
@@ -384,6 +388,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
 
     }
 
+    @CacheResult(cacheName = "openshift-cluster-inventory")
     @Override
     public Response viewClusterInventory(OpenShiftClient authenticatedClient) {
         if (authenticatedClient == null) {
@@ -435,6 +440,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
         }
     }
 
+    @CacheResult(cacheName = "openshift-cluster-network")
     @Override
     public Response viewClusterNetwork(OpenShiftClient authenticatedClient) {
         if (authenticatedClient == null) {
@@ -485,6 +491,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
         }
     }
 
+    @CacheResult(cacheName = "openshift-cluster-ip")
     @Override
     public Response viewClusterIP(OpenShiftClient authenticatedClient) {
         if (authenticatedClient == null) {
@@ -549,6 +556,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
         }
     }
 
+    @CacheResult(cacheName = "openshift-cluster-nodes")
     @Override
     public Response viewClusterNodes(OpenShiftClient authenticatedClient) {
 
@@ -592,6 +600,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
         return node.getMetadata().getLabels().containsKey("node-role.kubernetes.io/worker");
     }
 
+    @CacheResult(cacheName = "openshift-node-ip")
     @Override
     public Response viewNodeIP(OpenShiftClient authenticatedClient, String nodename) {
 
@@ -645,6 +654,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
         }
     }
 
+    @CacheResult(cacheName = "openshift-node-getdetails")
     @Override
     public Response getNodes(String username, String clustername, String nodename) {
         try {
@@ -669,6 +679,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
     }
 
     // one method
+    @CacheResult(cacheName = "openshift-cluster-details")
     @Override
     public Response clusterDetails(String username, String clustername) {
         try{        
@@ -736,7 +747,8 @@ public class OpenshiftLoginHandler implements LoginHandler {
         }
     }
 
-    @Override 
+    @CacheResult(cacheName = "cluster-login")
+    @Override
     public OpenShiftClient commonClusterLogin(String username, String clustername) {
         UserCredentials userCredentials = openshiftCredsRepo.getUser(username);
         Gson gson = new Gson();
@@ -814,6 +826,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
         }
     }
 
+    @CacheResult(cacheName = "openshift-node-details")
     @Override
     public Response clusterNodeDetails(String username, String clustername, String nodename) {
 
@@ -841,6 +854,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
 
     }
 
+    @CacheResult(cacheName = "view-cluster-capacity")
     @Override
     public Response viewClusterCapacity(OpenShiftClient openShiftClient, String nodename) {
 
