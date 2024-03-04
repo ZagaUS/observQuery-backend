@@ -237,13 +237,15 @@ public class OpenshiftLoginHandler implements LoginHandler {
             System.out.println("Invalid parameters");
         }
     }
-
     @Override
     public void unInstrumentDeployment(String username, String clustername, String namespace, String deploymentName) {
+        if (username == null || username.isEmpty() || clustername == null || clustername.isEmpty()) {
+            throw new IllegalArgumentException("Username and clustername must be provided.");
+        }
         OpenShiftClient openshiftLogin = commonClusterLogin(username, clustername);
         uninstrumentation(openshiftLogin, namespace, deploymentName);
-
     }
+    
 
 
     public void uninstrumentation(OpenShiftClient authenticatedClient, String namespace, String deploymentName) {
