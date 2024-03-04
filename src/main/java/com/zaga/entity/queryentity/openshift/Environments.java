@@ -17,4 +17,5 @@ public class Environments {
     private long clusterId;
     private String clusterName;
     private String openshiftClusterName;
+    private String clusterStatus;
 }
