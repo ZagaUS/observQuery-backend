@@ -59,8 +59,8 @@ public class OpenshiftLoginHandler implements LoginHandler {
     ClusterNetwork clusterNetwork;
 
     @Inject
-    OpenshiftCredsRepo openshiftCredsRepo;    
-    
+    OpenshiftCredsRepo openshiftCredsRepo;
+
     @CacheResult(cacheName = "openshift-cluster-login")
     public OpenShiftClient login(String username, String password, String oauthToken, boolean useOAuthToken,
             String clusterUrl) {
@@ -68,7 +68,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
             KubernetesClient kubernetesClient;
 
             if (useOAuthToken) {
-                kubernetesClient = new KubernetesClientBuilder() 
+                kubernetesClient = new KubernetesClientBuilder()
                         .withConfig(new ConfigBuilder()
                                 .withOauthToken(oauthToken)
                                 .withMasterUrl(clusterUrl)
@@ -123,14 +123,13 @@ public class OpenshiftLoginHandler implements LoginHandler {
     }
 
     @Override
-    public Response listAllServices(String username, String clustername){
+    public Response listAllServices(String username, String clustername) {
 
         OpenShiftClient openshiftLogin = commonClusterLogin(username, clustername);
         return listServices(openshiftLogin);
 
     }
 
-    
     public Response listServices(OpenShiftClient authenticatedClient) {
         System.out.println("clientservices" + authenticatedClient);
         if (authenticatedClient != null) {
@@ -190,13 +189,12 @@ public class OpenshiftLoginHandler implements LoginHandler {
     }
 
     @Override
-    public void instrumentDeployment(String username, String clustername, String namespace, String deploymentName){
+    public void instrumentDeployment(String username, String clustername, String namespace, String deploymentName) {
 
         OpenShiftClient openshiftLogin = commonClusterLogin(username, clustername);
         instrumentation(openshiftLogin, namespace, deploymentName);
 
     }
-
 
     public void instrumentation(OpenShiftClient authenticatedClient, String namespace, String deploymentName) {
         System.out.println("namespace: " + namespace);
@@ -244,7 +242,6 @@ public class OpenshiftLoginHandler implements LoginHandler {
         uninstrumentation(openshiftLogin, namespace, deploymentName);
 
     }
-
 
     public void uninstrumentation(OpenShiftClient authenticatedClient, String namespace, String deploymentName) {
         System.out.println("namespace: " + namespace);
@@ -682,17 +679,16 @@ public class OpenshiftLoginHandler implements LoginHandler {
     @CacheResult(cacheName = "openshift-cluster-details")
     @Override
     public Response clusterDetails(String username, String clustername) {
-        try{        
-
+        try {
 
             OpenShiftClient openShiftClient = commonClusterLogin(username, clustername);
             Response clusterInfo = viewClusterInfo(openShiftClient);
             Response clusterComponentStatus = viewClusterCondition(openShiftClient);
             Response clusterInventory = viewClusterInventory(openShiftClient);
             Response clusterNetwork = viewClusterNetwork(openShiftClient);
-            Response clusterIp = viewClusterIP(openShiftClient);  
-            Response clusterNodeMap = viewClusterNodes(openShiftClient);          
-    
+            Response clusterIp = viewClusterIP(openShiftClient);
+            Response clusterNodeMap = viewClusterNodes(openShiftClient);
+
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("clusterInfo", clusterInfo.getEntity());
             responseData.put("clusterStatus", clusterComponentStatus.getEntity());
@@ -703,13 +699,14 @@ public class OpenshiftLoginHandler implements LoginHandler {
             String clusterName = "ClusterMethod";
             Response cpuCapacity = viewClusterCapacity(openShiftClient, clusterName);
             responseData.put("cpuCapacity", cpuCapacity.getEntity());
-
+            // throw new Exception();
             return Response.ok(responseData).build();
         } catch (Exception e) {
             e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("You are unauthorized to do this action.")
-                    .build();
+            // return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+            // .entity("You are unauthorized to do this action.")
+            // .build();
+            return null;
         }
     }
 
@@ -741,9 +738,10 @@ public class OpenshiftLoginHandler implements LoginHandler {
             return Response.ok(addresses).build();
         } catch (Exception e) {
             e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("You are unauthorized to do this action.")
-                    .build();
+            return null;
+            // return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+            //         .entity("You are unauthorized to do this action.")
+            //         .build();
         }
     }
 
@@ -760,7 +758,8 @@ public class OpenshiftLoginHandler implements LoginHandler {
         for (JsonElement jsonElement2 : jsonArray) {
             System.out.println("---------------[COMMON CLUSTER LOGIN]----------- " + jsonElement2);
             String clusterName = jsonElement2.getAsJsonObject().get("clusterName").getAsString();
-            String clusterUserName =  jsonElement2.getAsJsonObject().get("clusterUsername") == null ? null :  jsonElement2.getAsJsonObject().get("clusterUsername").getAsString();
+            String clusterUserName = jsonElement2.getAsJsonObject().get("clusterUsername") == null ? null
+                    : jsonElement2.getAsJsonObject().get("clusterUsername").getAsString();
             String clusterPassword = jsonElement2.getAsJsonObject().get("clusterPassword").getAsString();
             String hostUrl = jsonElement2.getAsJsonObject().get("hostUrl").getAsString();
             Integer clusterID = jsonElement2.getAsJsonObject().get("clusterId").getAsInt();
@@ -777,7 +776,6 @@ public class OpenshiftLoginHandler implements LoginHandler {
 
         return openshiftLogin;
     }
-
 
     @Override
     public Response listClusters(String username) {
@@ -830,28 +828,30 @@ public class OpenshiftLoginHandler implements LoginHandler {
     @CacheResult(cacheName = "openshift-node-details")
     @Override
     public Response clusterNodeDetails(String username, String clustername, String nodename) {
+        try {
+            OpenShiftClient openShiftClient = commonClusterLogin(username, clustername);
+            Response clusterInfo = viewClusterInfo(openShiftClient);
+            Response clusterComponentStatus = viewClusterCondition(openShiftClient);
+            Response clusterNetwork = viewClusterNetwork(openShiftClient);
+            Response nodeIp = viewNodeIP(openShiftClient, nodename);
+            Response nodeInventory = getNodes(username, clustername, nodename);
+            Response cpuCapacity = viewClusterCapacity(openShiftClient, nodename);
 
-        OpenShiftClient openShiftClient = commonClusterLogin(username, clustername);
-        Response clusterInfo = viewClusterInfo(openShiftClient);
-        Response clusterComponentStatus = viewClusterCondition(openShiftClient);
-        Response clusterNetwork = viewClusterNetwork(openShiftClient);
-        Response nodeIp = viewNodeIP(openShiftClient, nodename);
-        Response nodeInventory = getNodes(username, clustername, nodename);
-        Response cpuCapacity = viewClusterCapacity(openShiftClient, nodename);
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("clusterInfo", clusterInfo.getEntity());
+            responseData.put("clusterStatus", clusterComponentStatus.getEntity());
+            // responseData.put("clusterInventory", clusterInve);
+            responseData.put("clusterNetwork", clusterNetwork.getEntity());
+            responseData.put("clusterIP", nodeIp.getEntity());
+            responseData.put("nodeInventory", nodeInventory.getEntity());
+            // responseData.put("clusterNodes", Arrays.asList(clusterNodeMap));
+            //
+            responseData.put("cpuCapacity", cpuCapacity.getEntity());
 
-
-        Map<String, Object> responseData = new HashMap<>();
-        responseData.put("clusterInfo", clusterInfo.getEntity());
-        responseData.put("clusterStatus", clusterComponentStatus.getEntity());
-        // responseData.put("clusterInventory", clusterInve);
-        responseData.put("clusterNetwork", clusterNetwork.getEntity());
-        responseData.put("clusterIP", nodeIp.getEntity());
-        responseData.put("nodeInventory", nodeInventory.getEntity());
-        // responseData.put("clusterNodes", Arrays.asList(clusterNodeMap));
-        //
-        responseData.put("cpuCapacity", cpuCapacity.getEntity());
-
-        return Response.ok(responseData).build();
+            return Response.ok(responseData).build();
+        } catch (Exception e) {
+            return null;
+        }
 
     }
 
@@ -860,7 +860,9 @@ public class OpenshiftLoginHandler implements LoginHandler {
     public Response viewClusterCapacity(OpenShiftClient openShiftClient, String nodename) {
 
         // OpenShiftClient openShiftClient = commonClusterLogin(username, clustername);
-        if(nodename.equals("ClusterMethod")){nodename = null;}
+        if (nodename.equals("ClusterMethod")) {
+            nodename = null;
+        }
         NodeList spec = openShiftClient.nodes().list();
         Gson gson = new Gson();
         JsonElement jsonElement = gson.toJsonTree(spec);
@@ -873,13 +875,13 @@ public class OpenshiftLoginHandler implements LoginHandler {
             Integer totalCpu = jsonElement2.getAsJsonObject().get("status").getAsJsonObject().get("capacity")
                     .getAsJsonObject().get("cpu").getAsJsonObject().get("amount").getAsInt();
             System.out.println("-------------------[CPU AMOUNT]----------------- " + totalCpu);
-            if(nodename != null && nodename.equals(nodeName)){
+            if (nodename != null && nodename.equals(nodeName)) {
                 cpuTotalAmount += totalCpu;
                 break;
             }
-            if(nodename == null){
+            if (nodename == null) {
                 cpuTotalAmount += totalCpu;
-            }   
+            }
         }
         System.out.println("-------------------[CPU TOTAL AMOUNT]----------------- " + cpuTotalAmount);
         return Response.ok(cpuTotalAmount).build();

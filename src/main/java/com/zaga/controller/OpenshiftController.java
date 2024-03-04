@@ -23,30 +23,28 @@ import jakarta.ws.rs.core.Response;
 @ApplicationScoped
 @Path("/openshift")
 public class OpenshiftController {
-    
-    
+
     @Inject
     private LoginHandler loginHandler;
 
     private OpenShiftClient authenticatedClient;
 
-   
-    @ConfigProperty(name = "my.timeout.property", defaultValue = "5000") // Set the timeout to 5 seconds (adjust as needed)
+    @ConfigProperty(name = "my.timeout.property", defaultValue = "5000") // Set the timeout to 5 seconds (adjust as
+                                                                         // needed)
     long timeout;
 
     @GET
     @Path("/login")
     @Produces(MediaType.APPLICATION_JSON)
     public Response login(
-        @QueryParam("username") String username,
-        @QueryParam("password") String password,
-        @QueryParam("oauthToken") String oauthToken, 
-        @QueryParam("useOAuthToken") boolean useOAuthToken,
-        @QueryParam("clusterUrl") String clusterUrl
-    ) {
+            @QueryParam("username") String username,
+            @QueryParam("password") String password,
+            @QueryParam("oauthToken") String oauthToken,
+            @QueryParam("useOAuthToken") boolean useOAuthToken,
+            @QueryParam("clusterUrl") String clusterUrl) {
         try {
             authenticatedClient = loginHandler.login(username, password, oauthToken, useOAuthToken, clusterUrl);
-    
+
             if (authenticatedClient != null) {
                 String successMessage = "Login successful!";
                 return Response.status(Response.Status.OK).entity(successMessage).build();
@@ -59,34 +57,41 @@ public class OpenshiftController {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorMessage).build();
         }
     }
-    
 
-   
     @GET
     @Path("/listAllProjects")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response listAllProjects(@QueryParam("username") String username,@QueryParam("clusterName") String clustername) {
+    public Response listAllProjects(@QueryParam("username") String username,
+            @QueryParam("clusterName") String clustername) {
         return loginHandler.listAllServices(username, clustername);
     }
 
     @GET
     @Path("/listAllNodes")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response listAllNodes(@QueryParam("username") String username,@QueryParam("clusterName") String clustername){
+    public Response listAllNodes(@QueryParam("username") String username,
+            @QueryParam("clusterName") String clustername) {
         Response response = loginHandler.listNodes(username, clustername);
-        
-        Object responseData = response.getEntity(); 
-        // Object[] responseDataArray = { responseData }; 
-      
-    return Response.ok(responseData).build(); 
-        
+
+        if (response == null) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Technical Exception error for this action.")
+                    .build();
+        } else {
+            Object responseData = response.getEntity();
+            // Object[] responseDataArray = { responseData };
+
+            return Response.ok(responseData).build();
+        }
+
     }
 
     // @GET
     // @Path("/listAllNodes")
     // @Produces(MediaType.APPLICATION_JSON)
-    // public Response listAllNodes(@QueryParam("username") String username,@QueryParam("clusterName") String clustername) {
-    //     return loginHandler.listNodes( username  , clustername);
+    // public Response listAllNodes(@QueryParam("username") String
+    // username,@QueryParam("clusterName") String clustername) {
+    // return loginHandler.listNodes( username , clustername);
     // }
 
     // @GET
@@ -94,35 +99,35 @@ public class OpenshiftController {
     // @Produces(MediaType.APPLICATION_JSON)
     // @Consumes(MediaType.APPLICATION_JSON)
     // public Response viewClusterInfo() {
-    //     return loginHandler.viewClusterInfo(authenticatedClient);
+    // return loginHandler.viewClusterInfo(authenticatedClient);
     // }
 
     // @GET
     // @Path("/viewClusterStatus")
     // @Produces(MediaType.APPLICATION_JSON)
     // public Response viewClusterCondition() {
-    //     return loginHandler.viewClusterCondition(authenticatedClient);
+    // return loginHandler.viewClusterCondition(authenticatedClient);
     // }
 
     // @GET
     // @Path("/viewClusterInventory")
     // @Produces(MediaType.APPLICATION_JSON)
     // public Response viewClusterInventory() {
-    //     return loginHandler.viewClusterInventory(authenticatedClient);
+    // return loginHandler.viewClusterInventory(authenticatedClient);
     // }
 
     // @GET
     // @Path("/viewClusterNetwork")
     // @Produces(MediaType.APPLICATION_JSON)
     // public Response viewClusterNetwork() {
-    //     return loginHandler.viewClusterNetwork(authenticatedClient);
+    // return loginHandler.viewClusterNetwork(authenticatedClient);
     // }
 
     // @GET
     // @Path("/viewClusterIP")
     // @Produces(MediaType.APPLICATION_JSON)
     // public Response viewClusterIp() {
-    //     return loginHandler.viewClusterIP(authenticatedClient);
+    // return loginHandler.viewClusterIP(authenticatedClient);
     // }
 
     @GET
@@ -132,39 +137,34 @@ public class OpenshiftController {
         return loginHandler.viewNodeIP(authenticatedClient, nodeName);
     }
 
-
     // @GET
     // @Path("/viewClusterNodes")
     // @Produces(MediaType.APPLICATION_JSON)
     // public Response viewClusterNode() {
-    //     return loginHandler.viewClusterNodes(authenticatedClient);
+    // return loginHandler.viewClusterNodes(authenticatedClient);
     // }
-
-
 
     @POST
     @Path("/instrument/{namespace}/{deploymentName}")
     public Response instrumentDeployment(
-        @QueryParam(value = "username") String username,
-        @QueryParam(value = "clusterName") String clustername,
-        @PathParam(value = "namespace") String namespace,
-         @PathParam(value = "deploymentName") String deploymentName) {
-            loginHandler.instrumentDeployment(username, clustername, namespace, deploymentName);
-        return Response.ok("Instrumented "+deploymentName+"service").build();
+            @QueryParam(value = "username") String username,
+            @QueryParam(value = "clusterName") String clustername,
+            @PathParam(value = "namespace") String namespace,
+            @PathParam(value = "deploymentName") String deploymentName) {
+        loginHandler.instrumentDeployment(username, clustername, namespace, deploymentName);
+        return Response.ok("Instrumented " + deploymentName + "service").build();
     }
 
     @POST
     @Path("/unInstrument/{namespace}/{deploymentName}")
     public Response unInstrumentDeployment(
-        @QueryParam(value = "username") String username,
-        @QueryParam(value = "clusterName") String clustername,
-        @PathParam(value = "namespace") String namespace,
-         @PathParam(value = "deploymentName") String deploymentName) {
-            loginHandler.unInstrumentDeployment(username, clustername, namespace, deploymentName);
-        return Response.ok("Uninstrumented"+deploymentName+"service").build();
+            @QueryParam(value = "username") String username,
+            @QueryParam(value = "clusterName") String clustername,
+            @PathParam(value = "namespace") String namespace,
+            @PathParam(value = "deploymentName") String deploymentName) {
+        loginHandler.unInstrumentDeployment(username, clustername, namespace, deploymentName);
+        return Response.ok("Uninstrumented" + deploymentName + "service").build();
     }
-    
-
 
     @GET
     @Path("/logout")
@@ -174,72 +174,78 @@ public class OpenshiftController {
         return "Logged out successfully!";
     }
 
-
-
-
-
-// @GET
-// @Path("/combinedinfo")
-// @Produces(MediaType.APPLICATION_JSON)
-// public Response getClusterInformation() {
-//     Response response = loginHandler.viewClustersInformation(authenticatedClient); 
-//     Object responseData = response.getEntity(); 
-//     Object[] responseDataArray = { responseData }; 
-//     return Response.ok(responseDataArray).build(); 
-// }
-
-
+    // @GET
+    // @Path("/combinedinfo")
+    // @Produces(MediaType.APPLICATION_JSON)
+    // public Response getClusterInformation() {
+    // Response response =
+    // loginHandler.viewClustersInformation(authenticatedClient);
+    // Object responseData = response.getEntity();
+    // Object[] responseDataArray = { responseData };
+    // return Response.ok(responseDataArray).build();
+    // }
 
     @GET
     @Path("/getClusterInformation")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getClusterDetails(@QueryParam("username") String username,@QueryParam("clusterName") String clustername){
+    public Response getClusterDetails(@QueryParam("username") String username,
+            @QueryParam("clusterName") String clustername) {
         Response response = loginHandler.clusterDetails(username, clustername);
-        Object responseData = response.getEntity(); 
-        Object[] responseDataArray = { responseData }; 
-      
-    return Response.ok(responseDataArray).build(); 
-        
+        if (response == null) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Technical Exception error for this action.")
+                    .build();
+        } else {
+            Object responseData = response.getEntity();
+            Object[] responseDataArray = { responseData };
+            return Response.ok(responseDataArray).build();
+        }
+
     }
 
     @GET
     @Path("/getClusterNodeInformation")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getClusterNodeDetails(@QueryParam("username") String username,@QueryParam("clusterName") String clustername, @QueryParam("nodeName") String nodename){
+    public Response getClusterNodeDetails(@QueryParam("username") String username,
+            @QueryParam("clusterName") String clustername, @QueryParam("nodeName") String nodename) {
         Response response = loginHandler.clusterNodeDetails(username, clustername, nodename);
-        Object responseData = response.getEntity(); 
-        Object[] responseDataArray = { responseData }; 
-      
-    return Response.ok(responseDataArray).build(); 
-        
+        if (response == null) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Technical Exception error for this action.")
+                    .build();
+        } else {
+            Object responseData = response.getEntity();
+            Object[] responseDataArray = { responseData };
+            return Response.ok(responseDataArray).build();
+        }
+
     }
 
     @GET
     @Path("/getAllClusters")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllClusters(@QueryParam("username") String username){
+    public Response getAllClusters(@QueryParam("username") String username) {
         Response response = loginHandler.listClusters(username);
         return response;
     }
 
-
     @GET
     @Path("/getNodeDetails")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getNodeDetails(@QueryParam("username") String username,@QueryParam("clusterName") String clustername, @QueryParam("nodeName") String nodename){
+    public Response getNodeDetails(@QueryParam("username") String username,
+            @QueryParam("clusterName") String clustername, @QueryParam("nodeName") String nodename) {
         Response response = loginHandler.getNodes(username, clustername, nodename);
         return response;
     }
 
-
     @GET
     @Path("/getClusterCapacity")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getClusterCapacity(@QueryParam("username") String username,@QueryParam("clusterName") String clustername,@QueryParam("nodeName") String nodename){
-        // Response response = loginHandler.viewClusterCapacity(username, clustername,nodename);
+    public Response getClusterCapacity(@QueryParam("username") String username,
+            @QueryParam("clusterName") String clustername, @QueryParam("nodeName") String nodename) {
+        // Response response = loginHandler.viewClusterCapacity(username,
+        // clustername,nodename);
         return null;
     }
-
-
 
 }
