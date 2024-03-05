@@ -90,33 +90,173 @@ public List<EventsDTO> getAllEvent() {
     return result;
   }
 
-public List<EventsDTO> executeAggregationPipeline(
-   MongoCollection<Document> collection,
-   LocalDate from,
-   LocalDate to, String nodeName, String clusterName) {
-           List<Bson> pipeline = new ArrayList<>();
-        pipeline.add(
-            Aggregates.addFields(
-                new Field<>("justDate", 
-                    new Document("$dateToString", 
-                        new Document("format", "%m-%d-%Y")
-                            .append("date", "$createdTime")
-                    )
-                )
-            )
-        );
-        pipeline.add(
-            Aggregates.match(
-                Filters.and(
-                    Filters.gte("justDate", from.format(DateTimeFormatter.ofPattern("MM-dd-yyyy"))),
-                    Filters.lte("justDate", to.format(DateTimeFormatter.ofPattern("MM-dd-yyyy")))
-                )
-            )
-        );
-        pipeline.add(Aggregates.sort(Sorts.descending("createdTime")));
+// public List<EventsDTO> executeAggregationPipeline(
+//    MongoCollection<Document> collection,
+//    LocalDate from,
+//    LocalDate to, String nodeName, String clusterName) {
+//            List<Bson> pipeline = new ArrayList<>();
+//         pipeline.add(
+//             Aggregates.addFields(
+//                 new Field<>("justDate", 
+//                     new Document("$dateToString", 
+//                         new Document("format", "%m-%d-%Y")
+//                             .append("date", "$createdTime")
+//                     )
+//                 )
+//             )
+//         );
+//         pipeline.add(
+//             Aggregates.match(
+//                 Filters.and(
+//                     Filters.gte("justDate", from.format(DateTimeFormatter.ofPattern("MM-dd-yyyy"))),
+//                     Filters.lte("justDate", to.format(DateTimeFormatter.ofPattern("MM-dd-yyyy")))
+//                 )
+//             )
+//         );
+//         pipeline.add(Aggregates.sort(Sorts.descending("createdTime")));
 
                
-new Document("$project", new Document("_id", 0)
+// new Document("$project", new Document("_id", 0)
+//             .append("nodeName", 1)
+//             .append("objectKind", 1)
+//             .append("objectName", 1)
+//             .append("scopeLogs", 1)
+//             .append("severityText", 1)
+//             .append("createdTime", 1)
+//             .append("clusterName", 1)
+//         );
+//         if (clusterName != null && !clusterName.isEmpty()) {
+//             if (nodeName != null && !nodeName.isEmpty()) {
+//                 pipeline.add(
+//                     Aggregates.match(
+//                         Filters.and(
+//                             Filters.eq("nodeName", nodeName),
+//                             Filters.eq("clusterName", clusterName)
+//                         )
+//                     )
+//                 );
+//             } else {
+//                 pipeline.add(
+//                     Aggregates.match(
+//                         Filters.eq("clusterName", clusterName)
+//                     )
+//                 );
+//             }
+//         }
+
+//     AggregateIterable<Document> aggregationResult = collection.aggregate(pipeline);
+
+//     List<EventsDTO> result = new ArrayList<>();
+//         for (Document document : aggregationResult) {
+//             EventsDTO eventsDTO = new EventsDTO();
+//             eventsDTO.setCreatedTime(document.getDate("createdTime"));
+//             eventsDTO.setNodeName(document.getString("nodeName"));
+//             eventsDTO.setObjectKind(document.getString("objectKind"));
+//             eventsDTO.setObjectName(document.getString("objectName"));
+//             eventsDTO.setSeverityText(document.getString("severityText"));
+//             eventsDTO.setClusterName(document.getString("clusterName"));
+//             // System.out.println("----clusterName-----"+eventsDTO.getClusterName());
+            
+//             List<Document> scopeLogsDocs = document.get("scopeLogs", List.class);
+//             if (scopeLogsDocs != null) {
+//                 List<ScopeLogs> scopeLogsList = new ArrayList<>();
+//                 for (Document scopeLogDoc : scopeLogsDocs) {
+//                     ScopeLogs scopeLogs = new ScopeLogs();
+//                     scopeLogs.setScope(scopeLogDoc.get("scope", Map.class));
+
+//                     List<Document> logRecordsDocs = scopeLogDoc.get("logRecords", List.class);
+//                     if (logRecordsDocs != null) {
+//                         List<LogRecords> logRecordsList = new ArrayList<>();
+//                         for (Document logRecordDoc : logRecordsDocs) {
+//                             LogRecords logRecord = new LogRecords();
+//                             logRecord.setTimeUnixNano(logRecordDoc.getString("timeUnixNano"));
+//                             logRecord.setSeverityNumber(logRecordDoc.getInteger("severityNumber"));
+//                             logRecord.setSeverityText(logRecordDoc.getString("severityText"));
+//                             logRecord.setSpanId(logRecordDoc.getString("spanId"));
+//                             logRecord.setTraceId(logRecordDoc.getString("traceId"));
+
+//                             Body body = new Body();
+//                             Document bodyDoc = logRecordDoc.get("body", Document.class);
+//                             if (bodyDoc != null) {
+//                             body.setStringValue(bodyDoc.getString("stringValue"));
+//                             }
+//                             logRecord.setBody(body);
+
+//                             logRecord.setAttributes(logRecordDoc.get("attributes", List.class));
+//                             logRecordsList.add(logRecord);
+//                         }
+//                         scopeLogs.setLogRecords(logRecordsList);
+//                     }
+//                     scopeLogsList.add(scopeLogs);
+//                 }
+//                 eventsDTO.setScopeLogs(scopeLogsList);
+//             }
+
+//             result.add(eventsDTO);
+//         }
+//         System.out.println("----------events data date wise------- " + result.size());
+
+//     return result;
+//    }    
+
+
+private List<EventsDTO> executeAggregationPipeline(
+        MongoCollection<Document> collection,
+        LocalDate from,
+        LocalDate to, String nodeName, String clusterName) {
+    List<Bson> pipeline = new ArrayList<>();
+    pipeline.add(
+            Aggregates.addFields(
+                    new Field<>("justDate",
+                            new Document("$dateToString",
+                                    new Document("format", "%m-%d-%Y")
+                                            .append("date", "$createdTime")
+                            )
+                    )
+            )
+    );
+    pipeline.add(
+            Aggregates.match(
+                    Filters.and(
+                            Filters.gte("justDate", from.format(DateTimeFormatter.ofPattern("MM-dd-yyyy"))),
+                            Filters.lte("justDate", to.format(DateTimeFormatter.ofPattern("MM-dd-yyyy")))
+                    )
+            )
+    );
+pipeline.add(
+    Aggregates.addFields(
+        new Field<>("severitySortOrder", 
+            new Document("$cond", Arrays.asList(
+                new Document("$eq", Arrays.asList("$severityText", "Warning")),
+                0, 
+                1  
+            ))
+        )
+    )
+);
+
+// pipeline.add(
+//     Aggregates.sort(
+//         Sorts.ascending("severitySortOrder", "createdTime")
+//     )
+// );
+
+pipeline.add(
+    Aggregates.sort(
+        Sorts.orderBy(
+            Sorts.ascending("severitySortOrder"), 
+            Sorts.descending("createdTime") 
+        )
+    )
+);
+
+pipeline.add(
+    Aggregates.project(
+        Projections.exclude("severitySortOrder")
+    )
+);
+
+    pipeline.add(new Document("$project", new Document("_id", 0)
             .append("nodeName", 1)
             .append("objectKind", 1)
             .append("objectName", 1)
@@ -124,80 +264,83 @@ new Document("$project", new Document("_id", 0)
             .append("severityText", 1)
             .append("createdTime", 1)
             .append("clusterName", 1)
-        );
-        if (clusterName != null && !clusterName.isEmpty()) {
-            if (nodeName != null && !nodeName.isEmpty()) {
-                pipeline.add(
+    ));
+
+    if (clusterName != null && !clusterName.isEmpty()) {
+        if (nodeName != null && !nodeName.isEmpty()) {
+            pipeline.add(
                     Aggregates.match(
-                        Filters.and(
-                            Filters.eq("nodeName", nodeName),
+                            Filters.and(
+                                    Filters.eq("nodeName", nodeName),
+                                    Filters.eq("clusterName", clusterName)
+                            )
+                    )
+            );
+        } else {
+            pipeline.add(
+                    Aggregates.match(
                             Filters.eq("clusterName", clusterName)
-                        )
                     )
-                );
-            } else {
-                pipeline.add(
-                    Aggregates.match(
-                        Filters.eq("clusterName", clusterName)
-                    )
-                );
-            }
+            );
         }
+    }
 
     AggregateIterable<Document> aggregationResult = collection.aggregate(pipeline);
 
     List<EventsDTO> result = new ArrayList<>();
-        for (Document document : aggregationResult) {
-            EventsDTO eventsDTO = new EventsDTO();
-            eventsDTO.setCreatedTime(document.getDate("createdTime"));
-            eventsDTO.setNodeName(document.getString("nodeName"));
-            eventsDTO.setObjectKind(document.getString("objectKind"));
-            eventsDTO.setObjectName(document.getString("objectName"));
-            eventsDTO.setSeverityText(document.getString("severityText"));
-            eventsDTO.setClusterName(document.getString("clusterName"));
-            // System.out.println("----clusterName-----"+eventsDTO.getClusterName());
-            
-            List<Document> scopeLogsDocs = document.get("scopeLogs", List.class);
-            if (scopeLogsDocs != null) {
-                List<ScopeLogs> scopeLogsList = new ArrayList<>();
-                for (Document scopeLogDoc : scopeLogsDocs) {
-                    ScopeLogs scopeLogs = new ScopeLogs();
-                    scopeLogs.setScope(scopeLogDoc.get("scope", Map.class));
+    for (Document document : aggregationResult) {
+        EventsDTO eventsDTO = new EventsDTO();
+        eventsDTO.setCreatedTime(document.getDate("createdTime"));
+        eventsDTO.setNodeName(document.getString("nodeName"));
+        eventsDTO.setObjectKind(document.getString("objectKind"));
+        eventsDTO.setObjectName(document.getString("objectName"));
+        eventsDTO.setSeverityText(document.getString("severityText"));
+        eventsDTO.setClusterName(document.getString("clusterName"));
+        // System.out.println("----clusterName-----"+eventsDTO.getClusterName());
 
-                    List<Document> logRecordsDocs = scopeLogDoc.get("logRecords", List.class);
-                    if (logRecordsDocs != null) {
-                        List<LogRecords> logRecordsList = new ArrayList<>();
-                        for (Document logRecordDoc : logRecordsDocs) {
-                            LogRecords logRecord = new LogRecords();
-                            logRecord.setTimeUnixNano(logRecordDoc.getString("timeUnixNano"));
-                            logRecord.setSeverityNumber(logRecordDoc.getInteger("severityNumber"));
-                            logRecord.setSeverityText(logRecordDoc.getString("severityText"));
-                            logRecord.setSpanId(logRecordDoc.getString("spanId"));
-                            logRecord.setTraceId(logRecordDoc.getString("traceId"));
+        List<Document> scopeLogsDocs = document.get("scopeLogs", List.class);
+        if (scopeLogsDocs != null) {
+            List<ScopeLogs> scopeLogsList = new ArrayList<>();
+            for (Document scopeLogDoc : scopeLogsDocs) {
+                ScopeLogs scopeLogs = new ScopeLogs();
+                scopeLogs.setScope(scopeLogDoc.get("scope", Map.class));
 
-                            Body body = new Body();
-                            Document bodyDoc = logRecordDoc.get("body", Document.class);
-                            if (bodyDoc != null) {
+                List<Document> logRecordsDocs = scopeLogDoc.get("logRecords", List.class);
+                if (logRecordsDocs != null) {
+                    List<LogRecords> logRecordsList = new ArrayList<>();
+                    for (Document logRecordDoc : logRecordsDocs) {
+                        LogRecords logRecord = new LogRecords();
+                        logRecord.setTimeUnixNano(logRecordDoc.getString("timeUnixNano"));
+                        logRecord.setSeverityNumber(logRecordDoc.getInteger("severityNumber"));
+                        logRecord.setSeverityText(logRecordDoc.getString("severityText"));
+                        logRecord.setSpanId(logRecordDoc.getString("spanId"));
+                        logRecord.setTraceId(logRecordDoc.getString("traceId"));
+
+                        Body body = new Body();
+                        Document bodyDoc = logRecordDoc.get("body", Document.class);
+                        if (bodyDoc != null) {
                             body.setStringValue(bodyDoc.getString("stringValue"));
-                            }
-                            logRecord.setBody(body);
-
-                            logRecord.setAttributes(logRecordDoc.get("attributes", List.class));
-                            logRecordsList.add(logRecord);
                         }
-                        scopeLogs.setLogRecords(logRecordsList);
-                    }
-                    scopeLogsList.add(scopeLogs);
-                }
-                eventsDTO.setScopeLogs(scopeLogsList);
-            }
+                        logRecord.setBody(body);
 
-            result.add(eventsDTO);
+                        logRecord.setAttributes(logRecordDoc.get("attributes", List.class));
+                        logRecordsList.add(logRecord);
+                    }
+                    scopeLogs.setLogRecords(logRecordsList);
+                }
+                scopeLogsList.add(scopeLogs);
+            }
+            eventsDTO.setScopeLogs(scopeLogsList);
         }
-        System.out.println("----------events data date wise------- " + result.size());
+
+        result.add(eventsDTO);
+    }
+    System.out.println("----------events data date wise------- " + result.size());
 
     return result;
-   }    
+}
+
+
 
 private List<EventsDTO> executeAnotherLogic(
         MongoCollection<Document> collection,
@@ -242,7 +385,39 @@ private List<EventsDTO> executeAnotherLogic(
                     Projections.include("nodeName", "objectKind", "objectName", "scopeLogs", "severityText", "createdTime", "clusterName")
             )
     ));
-    pipeline.add(Aggregates.sort(Sorts.descending("createdTime")));
+    pipeline.add(
+    Aggregates.addFields(
+        new Field<>("severitySortOrder", 
+            new Document("$cond", Arrays.asList(
+                new Document("$eq", Arrays.asList("$severityText", "Warning")),
+                0, 
+                1  
+            ))
+        )
+    )
+);
+
+// pipeline.add(
+//     Aggregates.sort(
+//         Sorts.ascending("severitySortOrder", "createdTime")
+//     )
+// );
+
+pipeline.add(
+    Aggregates.sort(
+        Sorts.orderBy(
+            Sorts.ascending("severitySortOrder"), 
+            Sorts.descending("createdTime") 
+        )
+    )
+);
+
+pipeline.add(
+    Aggregates.project(
+        Projections.exclude("severitySortOrder")
+    )
+);
+
 
     AggregateIterable<Document> aggregationResult = null;
     try {
@@ -437,7 +612,42 @@ private List<EventsDTO> executeRecentLogic(
             Projections.include("nodeName", "objectKind", "objectName", "scopeLogs", "severityText", "createdTime", "clusterName")
         )
     ));
-    pipeline.add(Aggregates.sort(Sorts.descending("createdTime")));
+    // pipeline.add(Aggregates.sort(Sorts.descending("createdTime")));
+
+    pipeline.add(
+        Aggregates.addFields(
+            new Field<>("severitySortOrder", 
+                new Document("$cond", Arrays.asList(
+                    new Document("$eq", Arrays.asList("$severityText", "Warning")),
+                    0, 
+                    1  
+                ))
+            )
+        )
+    );
+    
+    // pipeline.add(
+    //     Aggregates.sort(
+    //         Sorts.ascending("severitySortOrder", "createdTime")
+    //     )
+    // );
+    
+    pipeline.add(
+        Aggregates.sort(
+            Sorts.orderBy(
+                Sorts.ascending("severitySortOrder"), 
+                Sorts.descending("createdTime") 
+            )
+        )
+    );
+    
+    pipeline.add(
+        Aggregates.project(
+            Projections.exclude("severitySortOrder")
+        )
+    );
+    
+    
     AggregateIterable<Document> aggregationResult;
     try {
         aggregationResult = collection.aggregate(pipeline);
