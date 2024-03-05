@@ -226,6 +226,20 @@ public class OpenshiftController {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllClusters(@QueryParam("username") String username) {
         Response response = loginHandler.listClusters(username);
+        if(response == null){
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Technical Exception error for this action").build();
+        }
+        return response;
+    }
+
+    @GET
+    @Path("/getActiveClusters")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getActiveClusters(@QueryParam("username") String username) {
+        Response response = loginHandler.listActiveClusters(username);
+        if(response == null){
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Technical Exception error for this action").build();
+        }
         return response;
     }
 

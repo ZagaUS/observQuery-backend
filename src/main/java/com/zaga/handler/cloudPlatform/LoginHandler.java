@@ -47,5 +47,6 @@ public interface LoginHandler {
     Response getNodes(String username, String clustername, String nodename);
 
     Response viewClusterCapacity(OpenShiftClient openShiftClient, String nodename);
+    Response listActiveClusters(String username);
 }
 

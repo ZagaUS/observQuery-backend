@@ -61,7 +61,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
     @Inject
     OpenshiftCredsRepo openshiftCredsRepo;
 
-    @CacheResult(cacheName = "openshift-cluster-login")
+    // @CacheResult(cacheName = "openshift-cluster-login")
     public OpenShiftClient login(String username, String password, String oauthToken, boolean useOAuthToken,
             String clusterUrl) {
         try {
@@ -678,7 +678,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
     }
 
     // one method
-    @CacheResult(cacheName = "openshift-cluster-details")
+    // @CacheResult(cacheName = "openshift-cluster-details")
     @Override
     public Response clusterDetails(String username, String clustername) {
         try {
@@ -747,7 +747,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
         }
     }
 
-    @CacheResult(cacheName = "cluster-login")
+    // @CacheResult(cacheName = "cluster-login")
     @Override
     public OpenShiftClient commonClusterLogin(String username, String clustername) {
         UserCredentials userCredentials = openshiftCredsRepo.getUser(username);
@@ -777,6 +777,41 @@ public class OpenshiftLoginHandler implements LoginHandler {
         OpenShiftClient openshiftLogin = login(CLUSTERUSERNAME, CLUSTERPASSWORD, "", false, CLUSTERURL);
 
         return openshiftLogin;
+    }
+
+    // listActiveClusters
+    @Override
+    public Response listActiveClusters(String username) {
+        UserCredentials userCredentials = openshiftCredsRepo.getUser(username);
+        System.out.println(userCredentials);
+        List<Environments> environments = userCredentials.getEnvironments();
+        List<Map<String, Object>> clusterInventory = new ArrayList<>();
+
+        // Create a list to store cluster names
+        List<Map<String, Object>> clusters = new ArrayList<>();
+
+        // Iterate through environments to find the cluster details
+        for (Environments environment : environments) {
+            if(environment.getClusterStatus().equals("active")){
+                Map<String, Object> clusterDetails = new HashMap<>();
+                clusterDetails.put("clusterName", environment.getClusterName());
+                clusterDetails.put("clusterId", environment.getClusterId());
+                clusterDetails.put("clusterType", environment.getClusterType());
+                clusterDetails.put("clusterUserName", environment.getClusterUsername());
+                clusterDetails.put("hostUrl", environment.getHostUrl());
+                clusterDetails.put("clusterPassword", environment.getClusterPassword());
+                clusterDetails.put("openshiftClusterName", environment.getOpenshiftClusterName());
+                clusterDetails.put("clusterStatus", environment.getClusterStatus());
+                clusters.add(clusterDetails);
+            }
+        }
+
+        if (!clusters.isEmpty()) {
+            return Response.ok(clusters).build();
+
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -827,7 +862,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
         }
     }
 
-    @CacheResult(cacheName = "openshift-node-details")
+    // @CacheResult(cacheName = "openshift-node-details")
     @Override
     public Response clusterNodeDetails(String username, String clustername, String nodename) {
         try {
