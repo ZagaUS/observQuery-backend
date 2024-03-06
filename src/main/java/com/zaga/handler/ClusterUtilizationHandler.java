@@ -238,8 +238,8 @@ public class ClusterUtilizationHandler {
                                 .append("fileSystemAvailable", "$avgFileSystemAvailable")));
                 }
                 
-                List<Document> aggregatedList = Stream.concat(pipeline.stream(), groupPipeLine.stream()).toList();
-                // List<Document> aggregatedList = Stream.concat(pipeline.stream(), groupPipeLine.stream()).collect(Collectors.toList());
+                // List<Document> aggregatedList = Stream.concat(pipeline.stream(), groupPipeLine.stream()).toList();
+                List<Document> aggregatedList = Stream.concat(pipeline.stream(), groupPipeLine.stream()).collect(Collectors.toList());
 
                 return aggregatedList;
         }
@@ -256,8 +256,8 @@ public class ClusterUtilizationHandler {
                         matchPipeLine = Arrays.asList(new Document("$match", 
                         new Document("clusterName", clusterName)));
                 }
-                List<Document> matchFilter = Stream.concat(pipeline.stream(), matchPipeLine.stream()).toList();
-                // List<Document> matchFilter = Stream.concat(pipeline.stream(), matchPipeLine.stream()).collect(Collectors.toList());
+                // List<Document> matchFilter = Stream.concat(pipeline.stream(), matchPipeLine.stream()).toList();
+                List<Document> matchFilter = Stream.concat(pipeline.stream(), matchPipeLine.stream()).collect(Collectors.toList());
                 return matchFilter;
         }
 }

@@ -134,7 +134,13 @@ public class ClusterUtilizationController{
         List<ClusterResponse> clusterResponses = clusterUtilizationHandler.getAllClusterByDateAndTime(from, to , minutesAgo, OPENSHIFTCLUSTERNAME, nodeName);
         if(clusterResponses.size() > 0 ){
             for (ClusterResponse clusterResponse : clusterResponses) {
-                clusterResponse.setCpuCapacity((Integer)response.getEntity());
+                System.out.println("------RESPONSE PAGE----- " + response.getEntity());
+                Gson gson2 = new Gson();
+                JsonElement jsonElement2 = gson2.toJsonTree(response.getEntity());
+                clusterResponse.setCpuCapacity(jsonElement2.getAsJsonObject().get("cpuTotalAmount").getAsInt());
+                clusterResponse.setMemoryCapacity(jsonElement2.getAsJsonObject().get("memoryTotalAmount").getAsFloat());
+
+                // clusterResponse.setCpuCapacity((Integer)response.getEntity());
             }
         }
         return clusterResponses;

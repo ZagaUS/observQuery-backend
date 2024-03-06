@@ -701,7 +701,6 @@ public class OpenshiftLoginHandler implements LoginHandler {
             String clusterName = "ClusterMethod";
             Response cpuCapacity = viewClusterCapacity(openShiftClient, clusterName);
             responseData.put("cpuCapacity", cpuCapacity.getEntity());
-            System.out.println("----------------RESPONSE DATA-----------> " + cpuCapacity.getEntity());
             // throw new Exception();
             return Response.ok(responseData).build();
         } catch (Exception e) {
@@ -885,7 +884,6 @@ public class OpenshiftLoginHandler implements LoginHandler {
             // responseData.put("clusterNodes", Arrays.asList(clusterNodeMap));
             //
             responseData.put("cpuCapacity", cpuCapacity.getEntity());
-            System.out.println("----------------RESPONSE DATA-----------> " + cpuCapacity);
             return Response.ok(responseData).build();
         } catch (Exception e) {
             return null;
