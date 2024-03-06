@@ -235,6 +235,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
             System.out.println("Invalid parameters");
         }
     }
+
     @Override
     public void unInstrumentDeployment(String username, String clustername, String namespace, String deploymentName) {
         if (username == null || username.isEmpty() || clustername == null || clustername.isEmpty()) {
@@ -243,7 +244,6 @@ public class OpenshiftLoginHandler implements LoginHandler {
         OpenShiftClient openshiftLogin = commonClusterLogin(username, clustername);
         uninstrumentation(openshiftLogin, namespace, deploymentName);
     }
-    
 
     public void uninstrumentation(OpenShiftClient authenticatedClient, String namespace, String deploymentName) {
         System.out.println("namespace: " + namespace);
@@ -701,6 +701,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
             String clusterName = "ClusterMethod";
             Response cpuCapacity = viewClusterCapacity(openShiftClient, clusterName);
             responseData.put("cpuCapacity", cpuCapacity.getEntity());
+            System.out.println("----------------RESPONSE DATA-----------> " + cpuCapacity.getEntity());
             // throw new Exception();
             return Response.ok(responseData).build();
         } catch (Exception e) {
@@ -742,8 +743,8 @@ public class OpenshiftLoginHandler implements LoginHandler {
             e.printStackTrace();
             return null;
             // return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-            //         .entity("You are unauthorized to do this action.")
-            //         .build();
+            // .entity("You are unauthorized to do this action.")
+            // .build();
         }
     }
 
@@ -792,7 +793,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
 
         // Iterate through environments to find the cluster details
         for (Environments environment : environments) {
-            if(environment.getClusterStatus().equals("active")){
+            if (environment.getClusterStatus().equals("active")) {
                 Map<String, Object> clusterDetails = new HashMap<>();
                 clusterDetails.put("clusterName", environment.getClusterName());
                 clusterDetails.put("clusterId", environment.getClusterId());
@@ -884,7 +885,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
             // responseData.put("clusterNodes", Arrays.asList(clusterNodeMap));
             //
             responseData.put("cpuCapacity", cpuCapacity.getEntity());
-
+            System.out.println("----------------RESPONSE DATA-----------> " + cpuCapacity);
             return Response.ok(responseData).build();
         } catch (Exception e) {
             return null;
@@ -905,23 +906,34 @@ public class OpenshiftLoginHandler implements LoginHandler {
         JsonElement jsonElement = gson.toJsonTree(spec);
         JsonArray jsonArray = jsonElement.getAsJsonObject().get("items").getAsJsonArray();
         Integer cpuTotalAmount = 0;
+        Long totalMemoryAmount = 0L;
         for (JsonElement jsonElement2 : jsonArray) {
             String nodeName = jsonElement2.getAsJsonObject().get("metadata").getAsJsonObject().get("name")
                     .getAsString();
             System.out.println("-------------------[NODE NAME]----------------- " + nodeName);
             Integer totalCpu = jsonElement2.getAsJsonObject().get("status").getAsJsonObject().get("capacity")
                     .getAsJsonObject().get("cpu").getAsJsonObject().get("amount").getAsInt();
-            System.out.println("-------------------[CPU AMOUNT]----------------- " + totalCpu);
+            // System.out.println("-------------------[CPU AMOUNT]----------------- " +
+            // totalCpu);
+            Long totalMemory = jsonElement2.getAsJsonObject().get("status").getAsJsonObject().get("capacity")
+                    .getAsJsonObject().get("memory").getAsJsonObject().get("amount").getAsLong();
+            System.out.println("-------------------[MEMORY AMOUNT]----------------- " + totalMemory);
             if (nodename != null && nodename.equals(nodeName)) {
+                totalMemoryAmount += totalMemory;
                 cpuTotalAmount += totalCpu;
                 break;
             }
             if (nodename == null) {
+                totalMemoryAmount += totalMemory;
                 cpuTotalAmount += totalCpu;
             }
         }
         System.out.println("-------------------[CPU TOTAL AMOUNT]----------------- " + cpuTotalAmount);
-        return Response.ok(cpuTotalAmount).build();
+        System.out.println("-------------------[MEMORY TOTAL AMOUNT]----------------- " + totalMemoryAmount/(1024.0*1024.0));
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("cpuTotalAmount", cpuTotalAmount);
+        responseMap.put("memoryTotalAmount", totalMemoryAmount/(1024.0*1024.0));
+        return Response.ok(responseMap).build();
     }
 
 }
