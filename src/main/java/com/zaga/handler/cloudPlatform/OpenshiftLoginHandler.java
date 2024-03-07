@@ -678,7 +678,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
     }
 
     // one method
-    // @CacheResult(cacheName = "openshift-cluster-details")
+    @CacheResult(cacheName = "openshift-cluster-details")
     @Override
     public Response clusterDetails(String username, String clustername) {
         try {
@@ -711,7 +711,8 @@ public class OpenshiftLoginHandler implements LoginHandler {
             return null;
         }
     }
-
+// one method
+@CacheResult(cacheName = "openshift-node-list")
     @Override
     public Response listNodes(String username, String clustername) {
         try {
@@ -862,7 +863,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
         }
     }
 
-    // @CacheResult(cacheName = "openshift-node-details")
+    @CacheResult(cacheName = "openshift-node-details")
     @Override
     public Response clusterNodeDetails(String username, String clustername, String nodename) {
         try {
