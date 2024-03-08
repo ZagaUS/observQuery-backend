@@ -166,13 +166,13 @@ public class OpenshiftController {
         return Response.ok("Uninstrumented" + deploymentName + "service").build();
     }
 
-    @GET
-    @Path("/logout")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String logout() {
-        loginHandler.logout(authenticatedClient);
-        return "Logged out successfully!";
-    }
+    // @GET
+    // @Path("/logout")
+    // @Produces(MediaType.APPLICATION_JSON)
+    // public String logout() {
+    //     loginHandler.logout(authenticatedClient);
+    //     return "Logged out successfully!";
+    // }
 
     // @GET
     // @Path("/combinedinfo")
