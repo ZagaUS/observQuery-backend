@@ -68,8 +68,8 @@ public class MetricQueryHandler {
             throw new IllegalArgumentException("Either date range or minutesAgo must be provided");
         }
     
-     Bson serviceNameFilter = Filters.regex("serviceName", Pattern.compile(serviceName, Pattern.CASE_INSENSITIVE));
-        // Bson serviceNameFilter = Filters.eq("serviceName", serviceName);
+    //  Bson serviceNameFilter = Filters.regex("serviceName", Pattern.compile(serviceName, Pattern.CASE_INSENSITIVE));
+        Bson serviceNameFilter = Filters.eq("serviceName", serviceName);
         Bson finalFilter = Filters.and(timeFilter, serviceNameFilter);
     
         MongoCollection<Document> collection = mongoClient

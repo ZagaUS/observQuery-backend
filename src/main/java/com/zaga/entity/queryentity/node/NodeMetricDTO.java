@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 @MongoEntity(collection = "NodeMetricDTO",database = "OtelClusterUtilization")
 public class NodeMetricDTO extends PanacheMongoEntity{
     private Date date;
+    private String clusterName;
     private Double cpuUsage;
     private Long memoryUsage;
     private String nodeName;
