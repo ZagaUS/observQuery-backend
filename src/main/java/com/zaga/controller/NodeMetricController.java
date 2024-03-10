@@ -54,7 +54,7 @@ public class NodeMetricController {
             if (from != null && to != null) {
                 Instant fromInstant = from.atStartOfDay(ZoneId.systemDefault()).toInstant();
                 Instant toInstant = to.atStartOfDay(ZoneId.systemDefault()).toInstant().plusSeconds(86399); // Adjusted to end of day
-
+System.out.println("------Number of data date wise" + allNodeMetrics.size());
                 allNodeMetrics = filterMetricsByDateRange(allNodeMetrics, fromInstant, toInstant);
             } else if (minutesAgo > 0) {
                 Instant currentInstant = Instant.now();
@@ -62,7 +62,7 @@ public class NodeMetricController {
 
                 allNodeMetrics = filterMetricsByMinutesAgo(allNodeMetrics, fromInstant, currentInstant);
             }
-            System.out.println("Number of data in the specified time range: " + allNodeMetrics.size());
+            System.out.println("-----------Number of data in the specified time range: " + allNodeMetrics.size());
             ObjectMapper objectMapper = new ObjectMapper();
             String responseJson = objectMapper.writeValueAsString(allNodeMetrics);
 

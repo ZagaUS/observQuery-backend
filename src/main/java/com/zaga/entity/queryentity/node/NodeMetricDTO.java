@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @JsonIgnoreProperties("id")
-@MongoEntity(collection = "NodeMetricDTO",database = "OtelNode")
+@MongoEntity(collection = "NodeMetricDTO",database = "OtelClusterUtilization")
 public class NodeMetricDTO extends PanacheMongoEntity{
     private Date date;
     private Double cpuUsage;

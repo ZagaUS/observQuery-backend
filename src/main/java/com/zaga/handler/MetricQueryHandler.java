@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -63,11 +64,12 @@ public class MetricQueryHandler {
             );
         }
          else {
-            // Handle the case when neither date range nor minutesAgo is provided
+           
             throw new IllegalArgumentException("Either date range or minutesAgo must be provided");
         }
     
-        Bson serviceNameFilter = Filters.eq("serviceName", serviceName);
+     Bson serviceNameFilter = Filters.regex("serviceName", Pattern.compile(serviceName, Pattern.CASE_INSENSITIVE));
+        // Bson serviceNameFilter = Filters.eq("serviceName", serviceName);
         Bson finalFilter = Filters.and(timeFilter, serviceNameFilter);
     
         MongoCollection<Document> collection = mongoClient
