@@ -14,8 +14,9 @@ public class NodeMetricHandler {
     @Inject
     NodeDTORepo nodeDTORepo;
 
-    public List<NodeMetricDTO> getAllNodeMetricData() {
-       return nodeDTORepo.listAll();
+    public List<NodeMetricDTO> getAllNodeMetricData(String nodeName, String OPENSHIFTCLUSTERNAME) {
+        return nodeDTORepo.listAll();
     }
+    
     
 }

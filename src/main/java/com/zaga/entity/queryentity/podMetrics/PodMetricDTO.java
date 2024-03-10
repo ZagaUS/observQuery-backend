@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @MongoEntity(collection = "PodMetricDTO", database = "OtelPodMetrics")
 public class PodMetricDTO {
     private List<MetricDTO> metrics = new ArrayList<>();
+    private String clusterName;
     private String podName;
     private String namespaceName;
 }
