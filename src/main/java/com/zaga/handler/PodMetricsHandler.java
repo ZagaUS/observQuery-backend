@@ -4,6 +4,8 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
 import com.zaga.entity.queryentity.podMetrics.MetricDTO;
 import com.zaga.entity.queryentity.podMetrics.PodMetricDTO;
 import com.zaga.entity.queryentity.podMetrics.PodMetricsResponseData;
@@ -28,7 +30,7 @@ public class PodMetricsHandler {
   MongoClient mongoClient;
 
 
-    public List<PodMetricsResponseData> getAllPodMetricsByDate(LocalDate from, LocalDate to, int page, int pageSize, int minutesAgo) {
+    public List<PodMetricsResponseData> getAllPodMetricsByDate(LocalDate from, LocalDate to, int page, int pageSize, int minutesAgo,String clusterName) {
         LocalDateTime startTime = LocalDateTime.now();
         System.out.println("------------DB call startTimestamp------ " + startTime);
     
@@ -38,9 +40,9 @@ public class PodMetricsHandler {
         List<PodMetricsResponseData> result;
     
         if (minutesAgo > 0) {
-            result = executeAggregationPipelineWithMinutesAgo(database, collection, minutesAgo,page,pageSize);
+            result = executeAggregationPipelineWithMinutesAgo(database, collection, minutesAgo,page,pageSize,clusterName);
         } else {
-            result = executeAggregationPipeline(database, collection, from, to,page,pageSize);
+            result = executeAggregationPipeline(database, collection, from, to,page,pageSize,clusterName);
         }
     
         LocalDateTime endTime = LocalDateTime.now();
@@ -58,11 +60,14 @@ public List<PodMetricsResponseData> executeAggregationPipeline(
         LocalDate from,
         LocalDate to,
         int page,
-        int pageSize
+        int pageSize,
+        String clusterName
     ) {
         int skip = (page - 1) * pageSize; // Calculate the number of documents to skip
     
-        List<Document> pipeline = Arrays.asList(
+        // List<Document> pipeline = Arrays.asList(
+            List<Document> pipeline = new ArrayList<>(Arrays.asList(
+
     new Document("$addFields", 
         new Document("justDate", 
             new Document("$dateToString", 
@@ -87,7 +92,20 @@ public List<PodMetricsResponseData> executeAggregationPipeline(
             .append("metrics", 
                 new Document("$slice", Arrays.asList("$metrics", skip, pageSize)))
             .append("totalCount", 1))
+            )
 );
+// if (clusterName != null && !clusterName.isEmpty()) {
+//     pipeline.add(
+//                     Aggregates.match(
+//                             Filters.eq("clusterName", clusterName)
+//                     )
+//             );
+// }
+
+if (clusterName != null && !clusterName.isEmpty()) {
+    pipeline.add(new Document("$match", 
+        new Document("clusterName", clusterName)));
+}
 
 AggregateIterable<Document> aggregationResult = collection.aggregate(pipeline, Document.class);
 
@@ -136,7 +154,7 @@ return resultList;
 
     public List<PodMetricsResponseData> executeAggregationPipelineWithMinutesAgo(
         MongoDatabase database, MongoCollection<Document> collection,
-        int minutesAgo, int page, int pageSize) {
+        int minutesAgo, int page, int pageSize,String clusterName) {
     LocalDateTime currentTime = LocalDateTime.now().minusMinutes(minutesAgo);
     int skip = (page - 1) * pageSize;
 
@@ -170,6 +188,11 @@ return resultList;
     );
 
   
+if (clusterName != null && !clusterName.isEmpty()) {
+    pipeline.add(new Document("$match", 
+        new Document("clusterName", clusterName)));
+}
+
     AggregateIterable<Document> aggregationResult = collection.aggregate(pipeline, Document.class);
     List<PodMetricsResponseData> resultList = new ArrayList<>();
 int totalCount = 0;

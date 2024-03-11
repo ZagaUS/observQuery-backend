@@ -8,10 +8,17 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.zaga.entity.queryentity.openshift.UserCredentials;
 import com.zaga.entity.queryentity.podMetrics.PodMetricsResponseData;
 import com.zaga.handler.PodMetricsHandler;
+import com.zaga.handler.cloudPlatform.OpenshiftLoginHandler;
+import com.zaga.repo.OpenshiftCredsRepo;
 import com.zaga.repo.PodMetricDTORepo;
 
+import io.fabric8.openshift.client.OpenShiftClient;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -25,7 +32,11 @@ public class PodMetricController {
     @Inject
     PodMetricDTORepo podMetricRepo;
 
+   @Inject
+    OpenshiftLoginHandler openshiftLoginHandler;
 
+        @Inject
+    OpenshiftCredsRepo openshiftCredsRepo;  
 
 
     @Inject
@@ -38,8 +49,36 @@ public class PodMetricController {
             @QueryParam("to") LocalDate to,
             @QueryParam("page") int page,
         @QueryParam("pageSize") int pageSize,
-        @QueryParam("minutesAgo")int minutesAgo
+        @QueryParam("minutesAgo")int minutesAgo,
+        @QueryParam("clusterName")String clusterName,
+        @QueryParam("userName")String userName
+
     ) throws JsonProcessingException {
+
+// OpenShiftClient openShiftClient = openshiftLoginHandler.commonClusterLogin(userName, clusterName);
+    // String nodeString = nodeName;
+    // if (nodeName == null) {
+    //     nodeString = "ClusterMethod";
+    // }
+    // Response response = openshiftLoginHandler.viewClusterCapacity(openShiftClient);
+    UserCredentials userCredentials = openshiftCredsRepo.getUser(userName);
+    Gson gson = new Gson();
+    JsonElement jsonElement = gson.toJsonTree(userCredentials);
+    System.out.println("--------jsonEle----" + jsonElement);
+    JsonArray jsonArray = jsonElement.getAsJsonObject().get("environments").getAsJsonArray();
+    System.out.println("---------jsonArr" + jsonArray);
+
+    String OPENSHIFTCLUSTERNAME = null;
+    for (JsonElement jsonElement2 : jsonArray) {
+        String dbClusterName = jsonElement2.getAsJsonObject().get("clusterName").getAsString();
+        String openshiftClusterName = jsonElement2.getAsJsonObject().get("openshiftClusterName").getAsString();
+
+        if (clusterName.equalsIgnoreCase(dbClusterName)) {
+            OPENSHIFTCLUSTERNAME = openshiftClusterName;
+            break;
+        }
+    }
+
         LocalDateTime APICallStart = LocalDateTime.now();
 
         System.out.println("------------API call startTimestamp------ " + APICallStart);
@@ -49,7 +88,8 @@ public class PodMetricController {
                 to,
                 page,
                 pageSize,
-                minutesAgo
+                minutesAgo,
+                OPENSHIFTCLUSTERNAME
         );
 
         String responseJson = "";
