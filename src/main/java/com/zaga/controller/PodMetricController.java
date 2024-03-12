@@ -42,6 +42,52 @@ public class PodMetricController {
     @Inject
     PodMetricsHandler podMetricsHandler;
 
+
+//     @GET
+//     @Path("/getAllPodMetrics")
+//     public Response getAllPodMetrics(
+//             @QueryParam("from") LocalDate from,
+//             @QueryParam("to") LocalDate to,
+//             @QueryParam("page") int page,
+//         @QueryParam("pageSize") int pageSize,
+//         @QueryParam("minutesAgo")int minutesAgo
+//     ) throws JsonProcessingException {
+//         LocalDateTime APICallStart = LocalDateTime.now();
+
+//         System.out.println("------------API call startTimestamp------ " + APICallStart);
+
+//         List<PodMetricsResponseData> podMetricsData = podMetricsHandler.getAllPodMetricsByDate(
+//                 from,
+//                 to,
+//                 page,
+//                 pageSize,
+//                 minutesAgo
+//         );
+
+//         String responseJson = "";
+//         ObjectMapper objectMapper = new ObjectMapper();
+//         responseJson = objectMapper.writeValueAsString(podMetricsData);
+
+//         try {
+//             LocalDateTime APICallEnd = LocalDateTime.now();
+
+//             System.out.println("------------API call endTimestamp------ " + APICallEnd);
+
+//             System.out.println("-----------API call duration------- " +
+//                     (Duration.between(APICallStart, APICallEnd)));
+
+//             return Response.ok(responseJson, MediaType.APPLICATION_JSON).build();
+//         } catch (Exception e) {
+//             return Response
+//                     .status(Response.Status.INTERNAL_SERVER_ERROR)
+//                     .entity("Error converting response to JSON")
+//                     .build();
+//         }
+//     }
+
+
+
+
     @GET
     @Path("/getAllPodMetrics")
     public Response getAllPodMetrics(
@@ -55,9 +101,9 @@ public class PodMetricController {
 
     ) throws JsonProcessingException {
 
-// OpenShiftClient openShiftClient = openshiftLoginHandler.commonClusterLogin(userName, clusterName);
+OpenShiftClient openShiftClient = openshiftLoginHandler.commonClusterLogin(userName, clusterName);
     // String nodeString = nodeName;
-    // if (nodeName == null) {
+    // // if (nodeName == null) {
     //     nodeString = "ClusterMethod";
     // }
     // Response response = openshiftLoginHandler.viewClusterCapacity(openShiftClient);
@@ -88,7 +134,7 @@ public class PodMetricController {
                 to,
                 page,
                 pageSize,
-                minutesAgo,
+                minutesAgo, 
                 OPENSHIFTCLUSTERNAME
         );
 

@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class PodMetricsResponseData {
     // private String podName;
     private String namespaceName;
+    private String clusterName;
     private List<PodMetricDTO> pods;
     // private List<MetricDTO> metrics  = new ArrayList<>();
     private int totalCount;
