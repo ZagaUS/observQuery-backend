@@ -106,7 +106,7 @@ public Response getAllNodeMetricData(
     if (nodeName == null) {
         nodeString = "ClusterMethod";
     }
-    Response response = openshiftLoginHandler.viewClusterCapacity(openShiftClient, nodeString);
+    // Response response = openshiftLoginHandler.viewClusterCapacity(openShiftClient, nodeString);
     UserCredentials userCredentials = openshiftCredsRepo.getUser(userName);
     Gson gson = new Gson();
     JsonElement jsonElement = gson.toJsonTree(userCredentials);
