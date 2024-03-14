@@ -253,19 +253,19 @@ public class TraceQueryHandler {
 
  
   // sort order decending
-  @CacheResult(cacheName = "trace-get-all-sorting-decending")
+  // @CacheResult(cacheName = "trace-get-all-sorting-decending")
   public List<TraceDTO> getAllTracesOrderByCreatedTimeDesc(List<String> serviceNameList) {
     return traceQueryRepo.findAllOrderByCreatedTimeDesc(serviceNameList);
   }
 
   // sort order ascending
-  @CacheResult(cacheName = "trace-get-all-sorting-ascending")
+  // @CacheResult(cacheName = "trace-get-all-sorting-ascending")
   public List<TraceDTO> getAllTracesAsc(List<String> serviceNameList) {
     return traceQueryRepo.findAllOrderByCreatedTimeAsc(serviceNameList);
   }
 
   // sort order error first
-  @CacheResult(cacheName = "trace-get-all-sorting-errorFirst")
+  // @CacheResult(cacheName = "trace-get-all-sorting-errorFirst")
   public List<TraceDTO> findAllOrderByErrorFirst(List<String> serviceNameList) {
     MongoCollection<Document> traceCollection = mongoClient
         .getDatabase("OtelTrace")
@@ -289,7 +289,7 @@ public class TraceQueryHandler {
     return sortedTraces;
   }
 
-  @CacheResult(cacheName = "trace-get-all-sorting-peakedValueFirst")
+  // @CacheResult(cacheName = "trace-get-all-sorting-peakedValueFirst")
   public List<TraceDTO> findAllOrderByDuration(List<String> serviceNameList) {
     MongoCollection<Document> traceCollection = mongoClient
         .getDatabase("OtelTrace")
@@ -812,7 +812,7 @@ public class TraceQueryHandler {
     return fallback;
   }
 
-  @CacheResult(cacheName = "trace-summery-chart")
+  // @CacheResult(cacheName = "trace-summery-chart")
   public List<TraceMetrics> getAllTraceMetricCount(List<String> serviceNameList, LocalDate from, LocalDate to,
       int minutesAgo) {
     List<TraceDTO> traceList = traceQueryRepo.listAll();
@@ -915,7 +915,7 @@ public class TraceQueryHandler {
     }
   }
 
-  @CacheResult(cacheName = "trace-summery-chart-peakLatency")
+  // @CacheResult(cacheName = "trace-summery-chart-peakLatency")
   public List<TraceMetrics> getPeaKLatency(List<String> serviceNameList, LocalDate from, LocalDate to, int minutesAgo,
       int minpeakLatency, int maxpeakLatency) {
     List<TraceDTO> traceList = traceQueryRepo.listAll();
