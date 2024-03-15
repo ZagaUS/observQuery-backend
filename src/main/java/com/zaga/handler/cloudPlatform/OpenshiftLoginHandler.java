@@ -146,54 +146,88 @@ public class OpenshiftLoginHandler implements LoginHandler {
 
     }
 
-    public boolean instrumentation(OpenShiftClient authenticatedClient, String namespace, String deploymentName) {
-        try {
-            OpenShiftClient openShiftClient = authenticatedClient.adapt(OpenShiftClient.class);
-            Deployment deployment = openShiftClient.apps().deployments()
-                    .inNamespace(namespace)
-                    .withName(deploymentName)
-                    .get();
-            Map<String, String> annotations = deployment.getSpec().getTemplate().getMetadata().getAnnotations();
-            openShiftClient.apps().deployments()
-                    .inNamespace(namespace)
-                    .withName(deploymentName)
-                    .patch(deployment);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+
+    public void instrumentation(OpenShiftClient authenticatedClient,String namespace, String deploymentName) {
+        System.out.println("namespace: " + namespace);
+        System.out.println("deploymentName: " + deploymentName);
+        System.out.println("client: " + authenticatedClient);
+        if (authenticatedClient !=null && namespace != null && deploymentName != null) {
+            try {
+                OpenShiftClient openShiftClient = authenticatedClient.adapt(OpenShiftClient.class);
+                
+                System.out.print("authern----------"+authenticatedClient);
+
+                Deployment deployment = openShiftClient.apps().deployments()
+                        .inNamespace(namespace)
+                        .withName(deploymentName)
+                        .get();
+
+                if (deployment != null) {
+
+                    Map<String, String> annotations = deployment.getSpec().getTemplate().getMetadata().getAnnotations();
+                    System.out.println("---------Before instrumentation: ---------" + annotations.get("instrumentation.opentelemetry.io/inject-java"));
+                    annotations.put("instrumentation.opentelemetry.io/inject-java", "true");
+                    System.out.println("--------------After instrumentation:------- " + annotations.get("instrumentation.opentelemetry.io/inject-java"));
+
+                    openShiftClient.apps().deployments()
+                            .inNamespace(namespace)
+                            .withName(deploymentName)
+                            .patch(deployment);
+                } else {
+                    System.out.println("Deployment not found in namespace: " + namespace + ", deploymentName: " + deploymentName);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Invalid parameters");
         }
     }
 
     @Override
     public void unInstrumentDeployment(String username, String clustername, String namespace, String deploymentName) {
-        if (username == null || username.isEmpty() || clustername == null || clustername.isEmpty()) {
-            throw new IllegalArgumentException("Username and clustername must be provided.");
-        }
         OpenShiftClient openshiftLogin = commonClusterLogin(username, clustername);
         uninstrumentation(openshiftLogin, namespace, deploymentName);
     }
 
-    public boolean uninstrumentation(OpenShiftClient authenticatedClient, String namespace, String deploymentName) {
-        try {
-            OpenShiftClient openShiftClient = authenticatedClient.adapt(OpenShiftClient.class);
-            Deployment deployment = openShiftClient.apps().deployments()
-                    .inNamespace(namespace)
-                    .withName(deploymentName)
-                    .get();
 
-            Map<String, String> annotations = deployment.getSpec().getTemplate().getMetadata().getAnnotations();
+    public void uninstrumentation(OpenShiftClient authenticatedClient,String namespace, String deploymentName) {
+        System.out.println("namespace: " + namespace);
+        System.out.println("deploymentName: " + deploymentName);
+        System.out.println("client: " + authenticatedClient);
+        if (authenticatedClient !=null && namespace != null && deploymentName != null) {
+            try {
+                OpenShiftClient openShiftClient = authenticatedClient.adapt(OpenShiftClient.class);
+                
+                System.out.print("authern----------"+authenticatedClient);
 
-            openShiftClient.apps().deployments()
-                    .inNamespace(namespace)
-                    .withName(deploymentName)
-                    .patch(deployment);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+                Deployment deployment = openShiftClient.apps().deployments()
+                        .inNamespace(namespace)
+                        .withName(deploymentName)
+                        .get();
+
+                if (deployment != null) {
+
+                    Map<String, String> annotations = deployment.getSpec().getTemplate().getMetadata().getAnnotations();
+                    System.out.println("---------Before instrumentation: ---------" + annotations.get("instrumentation.opentelemetry.io/inject-java"));
+                    annotations.put("instrumentation.opentelemetry.io/inject-java", "false");
+                    System.out.println("--------------After instrumentation:------- " + annotations.get("instrumentation.opentelemetry.io/inject-java"));
+
+                    openShiftClient.apps().deployments()
+                            .inNamespace(namespace)
+                            .withName(deploymentName)
+                            .patch(deployment);
+                } else {
+                    System.out.println("Deployment not found in namespace: " + namespace + ", deploymentName: " + deploymentName);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Invalid parameters");
         }
     }
+
 
     @CacheResult(cacheName = "openshift-cluster-view")
     @Override
