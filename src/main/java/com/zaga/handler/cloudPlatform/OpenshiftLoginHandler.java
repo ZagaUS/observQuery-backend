@@ -667,6 +667,7 @@ public class OpenshiftLoginHandler implements LoginHandler {
             JsonArray jsonArray = jsonElement.getAsJsonObject().get("items").getAsJsonArray();
             Integer cpuTotalAmount = 0;
             Long totalMemoryAmount = 0L;
+            Long totalFileSystemAmount  = 0L;
             for (JsonElement jsonElement2 : jsonArray) {
                 String nodeName = jsonElement2.getAsJsonObject().get("metadata").getAsJsonObject().get("name")
                         .getAsString();
@@ -674,20 +675,25 @@ public class OpenshiftLoginHandler implements LoginHandler {
                         .getAsJsonObject().get("cpu").getAsJsonObject().get("amount").getAsInt();
                 Long totalMemory = jsonElement2.getAsJsonObject().get("status").getAsJsonObject().get("capacity")
                         .getAsJsonObject().get("memory").getAsJsonObject().get("amount").getAsLong();
+                Long totalFileMemory = jsonElement2.getAsJsonObject().get("status").getAsJsonObject().get("capacity")
+                        .getAsJsonObject().get("ephemeral-storage").getAsJsonObject().get("amount").getAsLong();
                 if (nodename != null && nodename.equals(nodeName)) {
                     totalMemoryAmount += totalMemory;
                     cpuTotalAmount += totalCpu;
+                    totalFileSystemAmount += totalFileMemory;
                     break;
                 }
                 if (nodename == null) {
                     totalMemoryAmount += totalMemory;
                     cpuTotalAmount += totalCpu;
+                    totalFileSystemAmount += totalFileMemory;
                 }
             }
 
             Map<String, Object> responseMap = new HashMap<>();
             responseMap.put("cpuTotalAmount", cpuTotalAmount);
             responseMap.put("memoryTotalAmount", totalMemoryAmount / (1024.0 * 1024.0));
+            responseMap.put("memoryFileSystemAmount", totalFileSystemAmount / (1024.0 * 1024.0));
             return Response.ok(responseMap).build();
         } catch (Exception e) {
             e.printStackTrace();

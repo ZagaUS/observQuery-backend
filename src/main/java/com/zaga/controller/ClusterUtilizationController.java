@@ -139,7 +139,7 @@ public class ClusterUtilizationController{
                 JsonElement jsonElement2 = gson2.toJsonTree(response.getEntity());
                 clusterResponse.setCpuCapacity(jsonElement2.getAsJsonObject().get("cpuTotalAmount").getAsInt());
                 clusterResponse.setMemoryCapacity(jsonElement2.getAsJsonObject().get("memoryTotalAmount").getAsFloat());
-
+                clusterResponse.setFileSystemCapacity(jsonElement2.getAsJsonObject().get("memoryFileSystemAmount").getAsFloat());
                 // clusterResponse.setCpuCapacity((Integer)response.getEntity());
             }
         }

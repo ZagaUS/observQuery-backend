@@ -13,9 +13,10 @@ public class ClusterResponse {
     private double cpuUsage;
     private double memoryUsage;
     private double memoryAvailable;
-    private double fileSystemCapacity;
+    // private double fileSystemCapacity;
     private double fileSystemUsage;
     private double fileSystemAvailable;
     private Integer cpuCapacity;
     private Float memoryCapacity;
+    private Float fileSystemCapacity;
 }
