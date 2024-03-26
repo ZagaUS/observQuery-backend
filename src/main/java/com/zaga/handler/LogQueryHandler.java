@@ -212,7 +212,12 @@ public List<LogDTO> getErrorLogsByServiceNamesOrderBySeverityAndCreatedTimeDesc(
 
     Bson addSortFieldStage = Aggregates.addFields(new Field<>("customSortField", new Document("$cond",
             Arrays.asList(
-                    new Document("$in", Arrays.asList("$severityText", Arrays.asList("ERROR", "SEVERE"))),
+                    new Document("$or", Arrays.asList(
+                        new Document("$regexMatch", new Document("input", "$severityText")
+                                                            .append("regex", "(?i)error")),
+                        new Document("$regexMatch", new Document("input", "$severityText")
+                                                            .append("regex", "(?i)severe"))
+                )),
                     0,
                     1
             )
@@ -361,11 +366,11 @@ private void calculateCallCounts(LogDTO logDTO, LogMetrics metrics) {
     for (ScopeLogs scopeLogs : logDTO.getScopeLogs()) {
         for (LogRecord logRecord : scopeLogs.getLogRecords()) {
             String severityText = logRecord.getSeverityText(); 
-            if ("ERROR".equals(severityText) || "SEVERE".equals(severityText)) {
+            if ("ERROR".equalsIgnoreCase(severityText) || "SEVERE".equalsIgnoreCase(severityText)) {
                 metrics.setErrorCallCount(metrics.getErrorCallCount() + 1);
-            } else if ("WARN".equals(severityText)) {
+            } else if ("WARN".equalsIgnoreCase(severityText)) {
                 metrics.setWarnCallCount(metrics.getWarnCallCount() + 1);
-            } else if ("DEBUG".equals(severityText)) {
+            } else if ("DEBUG".equalsIgnoreCase(severityText)) {
                 metrics.setDebugCallCount(metrics.getDebugCallCount() + 1);
             }
         }
@@ -394,7 +399,7 @@ public List<LogDTO> findByMatching(String serviceName) {
 
         for (ScopeLogs scopeLogs : scopeLogsList) {
             for (LogRecord logRecord : scopeLogs.getLogRecords()) {
-                if ("ERROR".equals(logRecord.getSeverityText())) {
+                if ("ERROR".equalsIgnoreCase(logRecord.getSeverityText())) {
                     hasError = true;
                     break;
                 }
@@ -517,7 +522,7 @@ public List<LogDTO> getFilterErrorLogs(List<LogDTO> logs) {
             .sorted(Comparator
                 .comparing((LogDTO log) -> {
                     String severityText = log.getSeverityText();
-                    return ("ERROR".equals(severityText) || "SEVERE".equals(severityText)) ? 0 : 1;
+                    return ("ERROR".equalsIgnoreCase(severityText) || "SEVERE".equalsIgnoreCase(severityText)) ? 0 : 1;
                 })
                 .thenComparing(LogDTO::getCreatedTime, Comparator.nullsLast(Comparator.reverseOrder()))
             )

@@ -402,7 +402,7 @@ public class TraceQueryHandler {
 
         // Filter the LogDTO objects with severityText "ERROR" or "SEVERE"
         List<LogDTO> matchingLogDTOs = logDTOs.stream()
-            .filter(logDTO -> "ERROR".equals(logDTO.getSeverityText()) || "SEVERE".equals(logDTO.getSeverityText()))
+            .filter(logDTO -> "ERROR".equalsIgnoreCase(logDTO.getSeverityText()) || "SEVERE".equalsIgnoreCase(logDTO.getSeverityText()))
             .collect(Collectors.toList());
 
         if (!matchingLogDTOs.isEmpty()) {
@@ -492,7 +492,7 @@ public class TraceQueryHandler {
       }
     }
     List<LogDTO> filteredLogDTOList = matchingLogDTOList.stream()
-        .filter(logDTO -> "ERROR".equals(logDTO.getSeverityText()) || "SEVERE".equals(logDTO.getSeverityText()))
+        .filter(logDTO -> "ERROR".equalsIgnoreCase(logDTO.getSeverityText()) || "SEVERE".equalsIgnoreCase(logDTO.getSeverityText()))
         .collect(Collectors.toList());
 
     return filteredLogDTOList;
